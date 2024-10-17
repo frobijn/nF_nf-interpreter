@@ -63,4 +63,4 @@ The proposed solution does not mess up custom firmware in the sense that:
 
 Either there is no change in serial number, or the developer will be notified that there is a change and has to take action. In no situation the serial number changes unnoticed from zeros to a non-zero value.
 
-It is also backward compatible, as the serial numbers are only exposed in .NET via the wire protocol. Generic tools that use the `nf_debugger` code will not have any business logic using serial numbers as there are now meaningless. Tools that are expecting the serial numbers to be set must be designed for a specific product and those serial numbers to not change.
+It is also backward compatible, as the serial numbers are only exposed in .NET via the wire protocol. Generic tools that use the `nf_debugger` code will not have any business logic using serial numbers as there are now meaningless. Tools that are expecting the serial numbers to be set must be designed for a specific product and those serial numbers will not be affected.
