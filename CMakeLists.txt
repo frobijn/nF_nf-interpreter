@@ -658,12 +658,27 @@ endif()
 #################################################################
 
 # include nanoFramework.Runtime.Events API
+if( API_nanoFramework.Runtime.ISR.Adc OR 
+    API_nanoFramework.Runtime.ISR.Gpio OR
+    API_nanoFramework.Runtime.ISR.I2c.Controller OR
+    API_nanoFramework.Runtime.ISR.I2c.Peripheral OR
+    API_nanoFramework.Runtime.ISR.Pwm OR
+    API_nanoFramework.Runtime.ISR.Spi OR
+    API_nanoFramework.Runtime.ISR.Timer.Esp32)
+
+    # these APIs requires nanoFramework.Runtime.Events
+    set(API_nanoFramework.Runtime.ISR.Core ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.ISR.Core")
+
+endif()
+
+# include nanoFramework.Runtime.Events API
 if( API_nanoFramework.Device.OneWire OR 
     API_System.Net OR
     API_System.Device.Gpio OR
     API_System.IO.Ports OR
     API_nanoFramework.Device.Can OR
-    API_System.IO.FileSystem)
+    API_System.IO.FileSystem OR
+    API_nanoFramework.Runtime.ISR.Core)
 
     # these APIs requires nanoFramework.Runtime.Events
     set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")

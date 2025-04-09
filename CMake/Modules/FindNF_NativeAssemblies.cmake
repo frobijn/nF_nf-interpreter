@@ -34,6 +34,14 @@ option(API_nanoFramework.Device.Bluetooth               "option for nanoFramewor
 option(API_System.Device.UsbStream                      "option for System.Device.UsbStream API")
 option(API_nanoFramework.System.IO.Hashing              "option for nanoFramework.System.IO.Hashing API")
 option(API_nanoFramework.System.Security.Cryptography   "option for nanoFramework.System.Security.Cryptography API")
+option(API_nanoFramework.Runtime.ISR.Core               "option for nanoFramework.Runtime.ISR.Core API")
+option(API_nanoFramework.Runtime.ISR.Adc                "option for nanoFramework.Runtime.ISR.Adc API")
+option(API_nanoFramework.Runtime.ISR.Gpio               "option for nanoFramework.Runtime.ISR.Gpio API")
+option(API_nanoFramework.Runtime.ISR.I2C.Controller     "option for nanoFramework.Runtime.ISR.I2C.Controller API")
+option(API_nanoFramework.Runtime.ISR.I2C.Peripheral     "option for nanoFramework.Runtime.ISR.I2C.Peripheral API")
+option(API_nanoFramework.Runtime.ISR.Pwm                "option for nanoFramework.Runtime.ISR.Pwm API")
+option(API_nanoFramework.Runtime.ISR.Spi                "option for nanoFramework.Runtime.ISR.Spi API")
+option(API_nanoFramework.Runtime.ISR.Timer.Esp32        "option for nanoFramework.Runtime.ISR.Timer.Esp32 API")
 
 # Esp32 only
 option(API_Hardware.Esp32                               "option for Hardware.Esp32")
@@ -450,6 +458,54 @@ endif()
 if(API_System.Device.UsbStream)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("System.Device.UsbStream")
+endif()
+
+# nanoFramework.Runtime.ISR.Core
+if(API_nanoFramework.Runtime.ISR.Core)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Runtime.ISR.Core")
+endif()
+
+# nanoFramework.Runtime.ISR.Adc
+if(API_nanoFramework.Runtime.ISR.Adc)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Runtime.ISR.Adc")
+endif()
+
+# nanoFramework.Runtime.ISR.Gpio
+if(API_nanoFramework.Runtime.ISR.Gpio)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Runtime.ISR.Gpio")
+endif()
+
+# nanoFramework.Runtime.ISR.I2C.Controller
+if(API_nanoFramework.Runtime.ISR.I2C.Controller)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Runtime.ISR.I2C.Controller")
+endif()
+
+# nanoFramework.Runtime.ISR.I2C.Peripheral
+if(API_nanoFramework.Runtime.ISR.I2C.Peripheral)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Runtime.ISR.I2C.Peripheral")
+endif()
+
+# nanoFramework.Runtime.ISR.Pwm
+if(API_nanoFramework.Runtime.ISR.Pwm)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Runtime.ISR.Pwm")
+endif()
+
+# nanoFramework.Runtime.ISR.Spi
+if(API_nanoFramework.Runtime.ISR.Spi)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Runtime.ISR.Spi")
+endif()
+
+# nanoFramework.Runtime.ISR.Timer.Esp32
+if(API_nanoFramework.Runtime.ISR.Timer.Esp32)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Runtime.ISR.Timer.Esp32")
 endif()
 
 # Interop assemblies
