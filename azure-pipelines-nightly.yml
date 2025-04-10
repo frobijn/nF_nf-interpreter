@@ -294,13 +294,14 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('STM32_1_12_3_versioncounter', 0)]
+      REVISION: $[counter('STM32_1_12_4_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "stm32"
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
+      - template: azure-pipelines-templates/download-install-cmake.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-install-ninja.yml
       - template: azure-pipelines-templates/download-srecord.yml
@@ -581,7 +582,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('ESP32_1_12_3_versioncounter', 0)]
+      REVISION: $[counter('ESP32_1_12_4_versioncounter', 0)]
       IDF_PATH: "D:/a/1/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
@@ -664,13 +665,14 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('TI_1_12_3_versioncounter', 0)]
+      REVISION: $[counter('TI_1_12_4_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "ti_simplelink"
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
+      - template: azure-pipelines-templates/download-install-cmake.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-install-ninja.yml
       - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
@@ -715,13 +717,14 @@ jobs:
 
     variables:
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('AZURERTOS_1_12_3_versioncounter', 0)]
+      REVISION: $[counter('AZURERTOS_1_12_4_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "efm32"
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
+      - template: azure-pipelines-templates/download-install-cmake.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-install-ninja.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
