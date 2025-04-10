@@ -11,7 +11,11 @@
 //-----------------------------------------------------------------------------
 
 #include "nf_runtime_isr_spi.h"
+#include "CLR_IncludedAPI.h"
 
+#ifndef API_System_Device_Spi
+#error Native assembly for System.Device.Spi is required for nanoFramework.Runtime.ISR.Spi
+#endif
 
 HRESULT Library_nf_runtime_isr_spi_nanoFramework_Runtime_ISR_SpiDevice::GetNativeMemorySize___U4( CLR_RT_StackFrame &stack )
 {

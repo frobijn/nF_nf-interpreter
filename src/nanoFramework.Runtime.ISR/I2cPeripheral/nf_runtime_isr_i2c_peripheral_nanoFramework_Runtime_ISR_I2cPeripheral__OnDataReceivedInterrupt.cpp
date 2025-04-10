@@ -11,7 +11,7 @@
 //-----------------------------------------------------------------------------
 
 #include "nf_runtime_isr_i2c_peripheral.h"
-
+#include "CLR_IncludedAPI.h"
 
 HRESULT Library_nf_runtime_isr_i2c_peripheral_nanoFramework_Runtime_ISR_I2cPeripheral__OnDataReceivedInterrupt::GetNativeMemorySize___U4( CLR_RT_StackFrame &stack )
 {

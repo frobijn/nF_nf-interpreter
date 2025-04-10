@@ -11,7 +11,11 @@
 //-----------------------------------------------------------------------------
 
 #include "nf_runtime_isr_gpio.h"
+#include "CLR_IncludedAPI.h"
 
+#ifndef API_System_Device_Gpio
+#error Native assembly for System.Device.Gpio is required for nanoFramework.Runtime.ISR.Gpio
+#endif
 
 HRESULT Library_nf_runtime_isr_gpio_nanoFramework_Runtime_ISR_GpioPin::GetNativeMemorySize___U4( CLR_RT_StackFrame &stack )
 {

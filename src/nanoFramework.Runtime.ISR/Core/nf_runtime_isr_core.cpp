@@ -2,15 +2,12 @@
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
-
 #include "nf_runtime_isr_core.h"
 
 // clang-format off
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    NULL,
-    NULL,
     NULL,
     NULL,
     NULL,

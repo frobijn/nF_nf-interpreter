@@ -12,6 +12,9 @@
 
 #include "nf_runtime_isr_i2c_peripheral.h"
 
+#ifndef API_System_Device_I2c
+#error Native assembly for System.Device.I2c_Slave is required for nanoFramework.Runtime.ISR.I2c.Peripheral
+#endif
 
 HRESULT Library_nf_runtime_isr_i2c_peripheral_nanoFramework_Runtime_ISR_I2cPeripheral::GetNativeMemorySize___U4( CLR_RT_StackFrame &stack )
 {

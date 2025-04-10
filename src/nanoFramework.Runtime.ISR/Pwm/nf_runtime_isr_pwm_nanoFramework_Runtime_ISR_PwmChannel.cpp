@@ -11,7 +11,11 @@
 //-----------------------------------------------------------------------------
 
 #include "nf_runtime_isr_pwm.h"
+#include "CLR_IncludedAPI.h"
 
+#ifndef API_System_Device_Pwm
+#error Native assembly for System.Device.Pwm is required for nanoFramework.Runtime.ISR.Pwm
+#endif
 
 HRESULT Library_nf_runtime_isr_pwm_nanoFramework_Runtime_ISR_PwmChannel::GetNativeMemorySize___U4( CLR_RT_StackFrame &stack )
 {

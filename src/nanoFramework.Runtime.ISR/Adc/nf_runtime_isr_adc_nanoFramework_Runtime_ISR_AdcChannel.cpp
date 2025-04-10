@@ -11,7 +11,11 @@
 //-----------------------------------------------------------------------------
 
 #include "nf_runtime_isr_adc.h"
+#include "CLR_IncludedAPI.h"
 
+#ifndef API_System_Device_Adc
+#error Native assembly for System.Device.Adc is required for nanoFramework.Runtime.ISR.Adc
+#endif
 
 HRESULT Library_nf_runtime_isr_adc_nanoFramework_Runtime_ISR_AdcChannel::GetNativeMemorySize___U4( CLR_RT_StackFrame &stack )
 {
