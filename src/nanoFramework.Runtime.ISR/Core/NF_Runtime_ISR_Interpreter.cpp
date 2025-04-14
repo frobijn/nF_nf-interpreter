@@ -334,7 +334,8 @@ void NF_RunTime_ISR_HandleInterrupt (NF_Runtime_ISR_InterruptHandler *interruptH
 
     if (interruptHandler->AfterInterruptSetArgumentsOffset != 0 || interruptHandler->AfterInterruptOffset != 0)
     {
-        NF_RunTime_ISR_QueueRTOSTask (interruptHandler);
+        NF_Runtime_ISR_ServiceParameterType taskDataOffset = *(NF_Runtime_ISR_ServiceParameterType *)(interruptHandler->AfterInterruptMemory + NF_Runtime_ISR_ServiceParameterTypeSize);
+        NF_RunTime_ISR_QueueRTOSTask (interruptHandler, interruptHandler->AfterInterruptMemory + taskDataOffset);
     }
 }
 

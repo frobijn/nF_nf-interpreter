@@ -38,6 +38,9 @@ struct Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManag
     NANOCLR_NATIVE_DECLARE(DoGetMemoryPointer___I4__I4__U4);
     NANOCLR_NATIVE_DECLARE(DoReadMemory___VOID__I4__U4__SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(DoReleaseMemory___VOID__nanoFrameworkRuntimeISRInterpreterMemoryType__I4);
+    NANOCLR_NATIVE_DECLARE(RTOSTask_GetMemorySize___U4);
+    NANOCLR_NATIVE_DECLARE(DoEnableRTOSTask___VOID__I4__U2);
+    NANOCLR_NATIVE_DECLARE(DisableRTOSTask___VOID__I4);
     NANOCLR_NATIVE_DECLARE(DoStartServiceRoutine___VOID__nanoFrameworkRuntimeISROnManagedActivation);
     NANOCLR_NATIVE_DECLARE(DataBuffer_GetMemorySize___U4__U4__U2);
     NANOCLR_NATIVE_DECLARE(DataBuffer_Initialize___VOID__I4__U4__U2);

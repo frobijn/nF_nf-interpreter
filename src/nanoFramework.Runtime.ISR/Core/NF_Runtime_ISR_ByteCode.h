@@ -140,6 +140,7 @@ namespace nanoFramework.Runtime.ISR.Compilation{
     typedef CLR_INT32 NF_Runtime_ISR_ByteCodeOffsetType;
     typedef CLR_UINT32 NF_Runtime_ISR_ServiceParameterType;
 
+    constexpr NF_Runtime_ISR_ServiceParameterType NF_Runtime_ISR_ServiceParameterTypeSize = sizeof (NF_Runtime_ISR_ServiceParameterType);
     constexpr CLR_UINT8 NF_RUNTIME_ISR_MEMORY_HEAP_FLAG = 0x80;
     constexpr CLR_UINT8 NF_RUNTIME_ISR_MEMORY_HEAP_MASK = (CLR_UINT8)~NF_RUNTIME_ISR_MEMORY_HEAP_FLAG;
     constexpr CLR_UINT8 NF_RUNTIME_ISR_INDIRECT_REFERENCE_FLAG = 0x40;

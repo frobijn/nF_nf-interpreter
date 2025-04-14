@@ -103,7 +103,41 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
 
     InterpreterMemoryType memoryType = (InterpreterMemoryType)stack.Arg1().NumericByRef().s4;
     void *memory = ARG_AS_INTPTR(stack.Arg2());
-    NF_RunTime_ISR_ReleaseMemory(memoryType, memory);
+	if (memory != nullptr)
+	{
+		NF_RunTime_ISR_ReleaseMemory(memoryType, memory);
+	}
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::RTOSTask_GetMemorySize___U4( CLR_RT_StackFrame &stack )
+{
+    NANOCLR_HEADER();
+
+    NF_Runtime_ISR_SharedDataOffsetType result = NF_RunTime_ISR_GetRTOSTaskMemorySize();
+    SET_RESULT_AS_SHAREDDATAOFFSETTYPE(result);
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DoEnableRTOSTask___VOID__I4__U2( CLR_RT_StackFrame &stack )
+{
+    NANOCLR_HEADER();
+
+    void *taskData = ARG_AS_INTPTR(stack.Arg1());
+    NF_Runtime_ISR_HeapOffsetType queueSize = ARG_AS_HEAPOFFSETTYPE(stack.Arg2());
+    NF_RunTime_ISR_EnableRTOSTask(taskData, queueSize);
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DisableRTOSTask___VOID__I4( CLR_RT_StackFrame &stack )
+{
+    NANOCLR_HEADER();
+
+    void *taskData = ARG_AS_INTPTR(stack.Arg1());
+    NF_RunTime_ISR_DisableRTOSTask(taskData);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
