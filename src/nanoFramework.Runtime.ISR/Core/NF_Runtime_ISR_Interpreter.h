@@ -9,7 +9,7 @@
 // and the nanoFramework.Runtime.ISR.Interpreter project. If this file
 // is modified in one git repository, make sure to copy it to to the
 // other repository as well.
-// 
+//
 //======================================================================
 
 #ifndef NF_RUNTIME_ISR_INTERPRETER_H
@@ -20,7 +20,7 @@
 //----------------------------------------------------------------------
 //
 // Interrupt handlers and service routines
-// 
+//
 //----------------------------------------------------------------------
 
 /// <summary>
@@ -40,10 +40,15 @@ typedef struct __nfpack NF_Runtime_ISR_DataBus
     /// <param name="dataBus">A pointer to this structure.</param>
     /// <param name="dataPtr">A pointer to the memory to write the data to.</param>
     /// <param name="dataSize">The number of bytes to read.</param>
-    /// <param name="result">If the <c>Read*</c> method of the data bus specification (in the <c>nanoFramework.Runtime.ISR.Specification</c> namespace)
-    /// has declared a return type, and that return type is used in the code of the service routine: a pointer to the (uninitialized) memory to write
-    /// the result to. Otherwise <see langword="nullptr" /> is passed.</param>
-    void (*Read) (struct NF_Runtime_ISR_DataBus *dataBus, CLR_UINT8 *dataPtr, NF_Runtime_ISR_HeapOffsetType dataSize, void *result);
+    /// <param name="result">If the <c>Read*</c> method of the data bus specification (in the
+    /// <c>nanoFramework.Runtime.ISR.Specification</c> namespace) has declared a return type, and that return type is
+    /// used in the code of the service routine: a pointer to the (uninitialized) memory to write the result to.
+    /// Otherwise <see langword="nullptr" /> is passed.</param>
+    void (*Read)(
+        struct NF_Runtime_ISR_DataBus *dataBus,
+        CLR_UINT8 *dataPtr,
+        NF_Runtime_ISR_HeapOffsetType dataSize,
+        void *result);
 
     /// <summary>
     /// Method to write a number of bytes to the data bus.
@@ -51,10 +56,15 @@ typedef struct __nfpack NF_Runtime_ISR_DataBus
     /// <param name="dataBus">A pointer to this structure.</param>
     /// <param name="dataPtr">A pointer to the memory to read the data from.</param>
     /// <param name="dataSize">The number of bytes to write.</param>
-    /// <param name="result">If the <c>Write*</c> method of the data bus specification (in the <c>nanoFramework.Runtime.ISR.Specification</c> namespace)
-    /// has declared a return type, and that return type is used in the code of the service routine: a pointer to the (uninitialized) memory to write
-    /// the result to. Otherwise <see langword="nullptr" /> is passed.</param>
-    void (*Write) (struct NF_Runtime_ISR_DataBus *dataBus, CLR_UINT8 *dataPtr, NF_Runtime_ISR_HeapOffsetType dataSize, void *result);
+    /// <param name="result">If the <c>Write*</c> method of the data bus specification (in the
+    /// <c>nanoFramework.Runtime.ISR.Specification</c> namespace) has declared a return type, and that return type is
+    /// used in the code of the service routine: a pointer to the (uninitialized) memory to write the result to.
+    /// Otherwise <see langword="nullptr" /> is passed.</param>
+    void (*Write)(
+        struct NF_Runtime_ISR_DataBus *dataBus,
+        CLR_UINT8 *dataPtr,
+        NF_Runtime_ISR_HeapOffsetType dataSize,
+        void *result);
 
     /// <summary>
     /// Method to write and read a number of bytes to the data bus in one operation.
@@ -64,10 +74,17 @@ typedef struct __nfpack NF_Runtime_ISR_DataBus
     /// <param name="writeDataSize">The number of bytes to write.</param>
     /// <param name="readDataPtr">A pointer to the memory to write the data to.</param>
     /// <param name="readDataSize">The number of bytes to read.</param>
-    /// <param name="result">If the <c>Write*Read*</c> method of the data bus specification (in the <c>nanoFramework.Runtime.ISR.Specification</c> namespace)
-    /// has declared a return type, and that return type is used in the code of the service routine: a pointer to the (uninitialized) memory to write
-    /// the result to. Otherwise <see langword="nullptr" /> is passed.</param>
-    void (*WriteRead) (struct NF_Runtime_ISR_DataBus *dataBus, CLR_UINT8 *writeDataPtr, NF_Runtime_ISR_HeapOffsetType writeDataSize, CLR_UINT8 *readDataPtr, NF_Runtime_ISR_HeapOffsetType readDataSize, void *result);
+    /// <param name="result">If the <c>Write*Read*</c> method of the data bus specification (in the
+    /// <c>nanoFramework.Runtime.ISR.Specification</c> namespace) has declared a return type, and that return type is
+    /// used in the code of the service routine: a pointer to the (uninitialized) memory to write the result to.
+    /// Otherwise <see langword="nullptr" /> is passed.</param>
+    void (*WriteRead)(
+        struct NF_Runtime_ISR_DataBus *dataBus,
+        CLR_UINT8 *writeDataPtr,
+        NF_Runtime_ISR_HeapOffsetType writeDataSize,
+        CLR_UINT8 *readDataPtr,
+        NF_Runtime_ISR_HeapOffsetType readDataSize,
+        void *result);
 
 } NF_Runtime_ISR_DataBus;
 
@@ -76,9 +93,9 @@ typedef struct __nfpack NF_Runtime_ISR_DataBus
 /// to raise an event that is handled in managed code.
 /// </summary>
 #ifdef NF_RUNTIME_ISR_FOR_NANOCLR
-typedef void (*NF_RunTime_ISR_RaiseManagedEvent) (CLR_INT32 managerId, CLR_UINT32 eventArg);
+typedef void (*NF_RunTime_ISR_RaiseManagedEvent)(CLR_INT32 managerId, CLR_UINT32 eventArg);
 #else
-typedef void (*NF_RunTime_ISR_RaiseManagedEvent) (CLR_UINT32 eventArg);
+typedef void (*NF_RunTime_ISR_RaiseManagedEvent)(CLR_UINT32 eventArg);
 #endif
 
 /// <summary>
@@ -91,15 +108,19 @@ typedef struct __nfpack NF_Runtime_ISR_InterruptHandler
 {
     /// <summary>Initialise this value with the <c>OnInterruptHandlers._onInterruptMemory</c> property value.</summary>
     CLR_UINT8 *OnInterruptMemory;
-    /// <summary>Initialise this value with the <c>OnInterruptHandlers._onInterruptSetArgumentsOffset</c> property value.</summary>
+    /// <summary>Initialise this value with the <c>OnInterruptHandlers._onInterruptSetArgumentsOffset</c> property
+    /// value.</summary>
     NF_Runtime_ISR_SharedDataOffsetType OnInterruptSetArgumentsOffset;
     /// <summary>Initialise this value with the <c>OnInterruptHandlers._onInterruptOffset</c> property value.</summary>
     NF_Runtime_ISR_SharedDataOffsetType OnInterruptOffset;
-    /// <summary>Initialise this value with the <c>OnInterruptHandlers._afterInterruptMemory</c> property value.</summary>
+    /// <summary>Initialise this value with the <c>OnInterruptHandlers._afterInterruptMemory</c> property
+    /// value.</summary>
     CLR_UINT8 *AfterInterruptMemory;
-    /// <summary>Initialise this value with the <c>OnInterruptHandlers._afterInterruptSetArgumentsOffset</c> property value.</summary>
+    /// <summary>Initialise this value with the <c>OnInterruptHandlers._afterInterruptSetArgumentsOffset</c> property
+    /// value.</summary>
     NF_Runtime_ISR_SharedDataOffsetType AfterInterruptSetArgumentsOffset;
-    /// <summary>Initialise this value with the <c>OnInterruptHandlers._afterInterruptOffset</c> property value.</summary>
+    /// <summary>Initialise this value with the <c>OnInterruptHandlers._afterInterruptOffset</c> property
+    /// value.</summary>
     NF_Runtime_ISR_SharedDataOffsetType AfterInterruptOffset;
 #ifdef NF_RUNTIME_ISR_FOR_NANOCLR
     /// <summary>Initialise this value with the <c>OnInterruptHandlers._managerId</c> property value.</summary>
@@ -115,22 +136,26 @@ typedef struct __nfpack NF_Runtime_ISR_InterruptHandler
 /// </summary>
 /// <param name="interruptHandler">Specification of the service routine(s) to run.</param>
 /// <param name="eventArg">Optional argument to pass to the first service routine to be called.</param>
-extern void NF_RunTime_ISR_HandleInterrupt (NF_Runtime_ISR_InterruptHandler *interruptHandler, NF_Runtime_ISR_ServiceParameterType eventArg);
+extern void NF_RunTime_ISR_HandleInterrupt(
+    NF_Runtime_ISR_InterruptHandler *interruptHandler,
+    NF_Runtime_ISR_ServiceParameterType eventArg);
 
 /// <summary>
 /// Run the service routine(s) from a RTOS task.
 /// </summary>
 /// <param name="interruptHandler">Specification of the service routine(s) to run.</param>
-extern void NF_RunTime_ISR_RunFromRTOSTask (NF_Runtime_ISR_InterruptHandler *interruptHandler);
+extern void NF_RunTime_ISR_RunFromRTOSTask(NF_Runtime_ISR_InterruptHandler *interruptHandler);
 
 /// <summary>
 /// Specification of the parameters required to run a service routine.
 /// </summary>
 typedef struct __nfpack NF_Runtime_ISR_ServiceRoutine
 {
-    /// <summary>Initialise this value with the interrupt handlers passed to <see cref="NF_RunTime_ISR_HandleInterrupt"/>.</summary>
+    /// <summary>Initialise this value with the interrupt handlers passed to <see
+    /// cref="NF_RunTime_ISR_HandleInterrupt"/>.</summary>
     NF_Runtime_ISR_InterruptHandler *InterruptHandler;
-    /// <summary>Indicates whether the service routine is called from an RTOS task instead of directly from the interrupt handler.</summary>
+    /// <summary>Indicates whether the service routine is called from an RTOS task instead of directly from the
+    /// interrupt handler.</summary>
     bool CalledFromTask;
     /// <summary>Pass the <c>NF_Runtime_ISR_InterruptHandler.*Offset</c> corresponding to the service routine.</summary>
     NF_Runtime_ISR_SharedDataOffsetType ServiceRoutineOffset;
@@ -142,8 +167,9 @@ typedef struct __nfpack NF_Runtime_ISR_ServiceRoutine
 /// Use the native interpreter to run a single service routine.
 /// </summary>
 /// <param name="serviceRoutine">Description of the service routine to call.</param>
-/// <returns>Indicates whether the execution of service routines should continue (<see langword="true"/>) or not (<see langword="false"/>).</returns>
-extern bool NF_RunTime_ISR_RunServiceRoutine (NF_Runtime_ISR_ServiceRoutine* serviceRoutine);
+/// <returns>Indicates whether the execution of service routines should continue (<see langword="true"/>) or not (<see
+/// langword="false"/>).</returns>
+extern bool NF_RunTime_ISR_RunServiceRoutine(NF_Runtime_ISR_ServiceRoutine *serviceRoutine);
 
 /// <summary>
 /// Specification of the interrupt handlers. If an interrupt handler requires additional data,
@@ -155,11 +181,13 @@ typedef struct __nfpack NF_Runtime_ISR_ManagedActivation
 {
     /// <summary>Initialise this value with the <c>OnManagedActivation._onInterruptMemory</c> property value.</summary>
     CLR_UINT8 *OnInterruptMemory;
-    /// <summary>Initialise this value with the <c>OnManagedActivation._afterInterruptMemory</c> property value.</summary>
+    /// <summary>Initialise this value with the <c>OnManagedActivation._afterInterruptMemory</c> property
+    /// value.</summary>
     CLR_UINT8 *AfterInterruptMemory;
     /// <summary>Initialise this value with the <c>OnManagedActivation._activationMemory</c> property value.</summary>
     CLR_UINT8 *ServiceRoutineMemory;
-    /// <summary>Initialise this value with the <c>OnManagedActivation._serviceRoutineOffset</c> property value.</summary>
+    /// <summary>Initialise this value with the <c>OnManagedActivation._serviceRoutineOffset</c> property
+    /// value.</summary>
     NF_Runtime_ISR_SharedDataOffsetType ServiceRoutineOffset;
 #ifdef NF_RUNTIME_ISR_FOR_NANOCLR
     /// <summary>Initialise this value with the <c>OnManagedActivation._managerId</c> property value.</summary>
@@ -171,31 +199,37 @@ typedef struct __nfpack NF_Runtime_ISR_ManagedActivation
 
 #ifdef NF_RUNTIME_ISR_FOR_NANOCLR
 /// <summary>
-/// Method to initialise the struct from an argument of type <c>nanoFramework.Runtime.ISR.ManagedActivation</c> that is passed by managed code.
+/// Method to initialise the struct from an argument of type <c>nanoFramework.Runtime.ISR.ManagedActivation</c> that is
+/// passed by managed code.
 /// </summary>
 /// <param name="managedActivation">Native data to pass to <see cref="NF_RunTime_ISR_RunServiceRoutine"/>.</param>
 /// <param name="Argument">Argument pass by the managed code.</param>
-extern void NF_RunTime_ISR_InitialiseManagedActivation (NF_Runtime_ISR_ManagedActivation &managedActivation, CLR_RT_HeapBlock *managedActivationArgument);
+extern void NF_RunTime_ISR_InitialiseManagedActivation(
+    NF_Runtime_ISR_ManagedActivation &managedActivation,
+    CLR_RT_HeapBlock *managedActivationArgument);
 #endif
 
 /// <summary>
 /// Use the native interpreter to run a single service routine.
 /// </summary>
 /// <param name="serviceRoutine">Description of the service routine to call.</param>
-extern void NF_RunTime_ISR_RunServiceRoutine (NF_Runtime_ISR_ManagedActivation *serviceRoutine);
+extern void NF_RunTime_ISR_RunServiceRoutine(NF_Runtime_ISR_ManagedActivation *serviceRoutine);
 
 //----------------------------------------------------------------------
 //
 // Access to data buffers from managed code
-// 
+//
 //----------------------------------------------------------------------
 
 /// <summary>
 /// Get the memory reserved for any of the data buffers.
 /// </summary>
 /// <param name="memory">Pointer to the memory that contains the data for the buffer.</param>
-/// <param name="offsetOffset">Offset in the memory to the location where memory for the buffer has been reserved.</param>
-extern CLR_UINT8 *NF_RunTime_ISR_DataBuffer_GetMemory (CLR_UINT8 *memory, NF_Runtime_ISR_SharedDataOffsetType offsetOffset);
+/// <param name="offsetOffset">Offset in the memory to the location where memory for the buffer has been
+/// reserved.</param>
+extern CLR_UINT8 *NF_RunTime_ISR_DataBuffer_GetMemory(
+    CLR_UINT8 *memory,
+    NF_Runtime_ISR_SharedDataOffsetType offsetOffset);
 
 /// <summary>
 /// Get the required memory size for the data buffer.
@@ -203,62 +237,77 @@ extern CLR_UINT8 *NF_RunTime_ISR_DataBuffer_GetMemory (CLR_UINT8 *memory, NF_Run
 /// <param name="capacity">The number of elements that can be stored in the buffer..</param>
 /// <param name="elementSize">The size in bytes of an element of the buffer.</param>
 /// <returns>The total amount of memory required.</returns>
-extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_DataBuffer_GetMemorySize (NF_Runtime_ISR_SharedDataOffsetType capacity, NF_Runtime_ISR_HeapOffsetType elementSize);
+extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_DataBuffer_GetMemorySize(
+    NF_Runtime_ISR_SharedDataOffsetType capacity,
+    NF_Runtime_ISR_HeapOffsetType elementSize);
 
 /// <summary>
 /// Initialise the data buffer.
 /// </summary>
-/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-/// <param name="capacity">The number of elements that can be stored in the buffer..</param>
-/// <param name="elementSize">The size in bytes of an element of the buffer.</param>
-extern void NF_RunTime_ISR_DataBuffer_Initialize (CLR_UINT8 *dataBuffer, NF_Runtime_ISR_SharedDataOffsetType capacity, NF_Runtime_ISR_HeapOffsetType elementSize);
+/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see
+/// cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param> <param name="capacity">The number of elements that can be
+/// stored in the buffer..</param> <param name="elementSize">The size in bytes of an element of the buffer.</param>
+extern void NF_RunTime_ISR_DataBuffer_Initialize(
+    CLR_UINT8 *dataBuffer,
+    NF_Runtime_ISR_SharedDataOffsetType capacity,
+    NF_Runtime_ISR_HeapOffsetType elementSize);
 
 /// <summary>
 /// Get the number of elements that can be stored in the buffer.
 /// </summary>
-/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_DataBuffer_Capacity (CLR_UINT8 *dataBuffer);
+/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see
+/// cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
+extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_DataBuffer_Capacity(CLR_UINT8 *dataBuffer);
 
 /// <summary>
 /// Get the size in bytes of an element of the buffer.
 /// </summary>
-/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-extern NF_Runtime_ISR_HeapOffsetType NF_RunTime_ISR_DataBuffer_ElementSize (CLR_UINT8 *dataBuffer);
+/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see
+/// cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
+extern NF_Runtime_ISR_HeapOffsetType NF_RunTime_ISR_DataBuffer_ElementSize(CLR_UINT8 *dataBuffer);
 
 /// <summary>
 /// Get the number of elements that are present in the buffer.
 /// </summary>
-/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_DataBuffer_Count (CLR_UINT8 *dataBuffer);
+/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see
+/// cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
+extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_DataBuffer_Count(CLR_UINT8 *dataBuffer);
 
 /// <summary>
 /// Add data to the buffer. No data is added if the buffer is already at capacity.
 /// </summary>
-/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-/// <param name="data">Data to add to the buffer.</param>
-extern void NF_RunTime_ISR_DataBuffer_Add (CLR_UINT8 *dataBuffer, CLR_UINT8 *data);
+/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see
+/// cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param> <param name="data">Data to add to the buffer.</param>
+extern void NF_RunTime_ISR_DataBuffer_Add(CLR_UINT8 *dataBuffer, CLR_UINT8 *data);
 
 /// <summary>
 /// Add data to the buffer. No data is added if the buffer is already at capacity.
 /// </summary>
-/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-/// <param name="index">Position in the buffer to store the data.</param>
-/// <param name="data">Data to add to the buffer.</param>
-extern void NF_RunTime_ISR_DataBuffer_Insert (CLR_UINT8 *dataBuffer, NF_Runtime_ISR_SharedDataOffsetType index, CLR_UINT8 *data);
+/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see
+/// cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param> <param name="index">Position in the buffer to store the
+/// data.</param> <param name="data">Data to add to the buffer.</param>
+extern void NF_RunTime_ISR_DataBuffer_Insert(
+    CLR_UINT8 *dataBuffer,
+    NF_Runtime_ISR_SharedDataOffsetType index,
+    CLR_UINT8 *data);
 
 /// <summary>
 /// Get data from the buffer.
 /// </summary>
-/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-/// <param name="index">Position in the buffer to get the data from.</param>
-/// <param name="data">Location to copy the data to.</param>
-extern void NF_RunTime_ISR_DataBuffer_Get (CLR_UINT8 *dataBuffer, NF_Runtime_ISR_SharedDataOffsetType index, CLR_UINT8 *data);
+/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see
+/// cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param> <param name="index">Position in the buffer to get the data
+/// from.</param> <param name="data">Location to copy the data to.</param>
+extern void NF_RunTime_ISR_DataBuffer_Get(
+    CLR_UINT8 *dataBuffer,
+    NF_Runtime_ISR_SharedDataOffsetType index,
+    CLR_UINT8 *data);
 
 /// <summary>
 /// Clear the buffer.
 /// </summary>
-/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-extern void NF_RunTime_ISR_DataBuffer_Clear (CLR_UINT8 *dataBuffer);
+/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see
+/// cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
+extern void NF_RunTime_ISR_DataBuffer_Clear(CLR_UINT8 *dataBuffer);
 
 /// <summary>
 /// Get the required memory size for the data ring buffer.
@@ -266,67 +315,74 @@ extern void NF_RunTime_ISR_DataBuffer_Clear (CLR_UINT8 *dataBuffer);
 /// <param name="capacity">The number of elements that can be stored in the buffer..</param>
 /// <param name="elementSize">The size in bytes of an element of the buffer.</param>
 /// <returns>The total amount of memory required.</returns>
-extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_DataRingBuffer_GetMemorySize (NF_Runtime_ISR_SharedDataOffsetType capacity, NF_Runtime_ISR_HeapOffsetType elementSize);
+extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_DataRingBuffer_GetMemorySize(
+    NF_Runtime_ISR_SharedDataOffsetType capacity,
+    NF_Runtime_ISR_HeapOffsetType elementSize);
 
 /// <summary>
 /// Initialise the data ring buffer.
 /// </summary>
-/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-/// <param name="capacity">The number of elements that can be stored in the buffer..</param>
-/// <param name="elementSize">The size in bytes of an element of the buffer.</param>
-extern void NF_RunTime_ISR_DataRingBuffer_Initialize (CLR_UINT8 *dataBuffer, NF_Runtime_ISR_SharedDataOffsetType capacity, NF_Runtime_ISR_HeapOffsetType elementSize);
+/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see
+/// cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param> <param name="capacity">The number of elements that can be
+/// stored in the buffer..</param> <param name="elementSize">The size in bytes of an element of the buffer.</param>
+extern void NF_RunTime_ISR_DataRingBuffer_Initialize(
+    CLR_UINT8 *dataBuffer,
+    NF_Runtime_ISR_SharedDataOffsetType capacity,
+    NF_Runtime_ISR_HeapOffsetType elementSize);
 
 /// <summary>
 /// Get the number of elements that can be stored in the ring buffer.
 /// </summary>
-/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_DataRingBuffer_Capacity (CLR_UINT8 *dataBuffer);
+/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see
+/// cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
+extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_DataRingBuffer_Capacity(CLR_UINT8 *dataBuffer);
 
 /// <summary>
 /// Get the size in bytes of an element of the ring buffer.
 /// </summary>
-/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-extern NF_Runtime_ISR_HeapOffsetType NF_RunTime_ISR_DataRingBuffer_ElementSize (CLR_UINT8 *dataBuffer);
+/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see
+/// cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
+extern NF_Runtime_ISR_HeapOffsetType NF_RunTime_ISR_DataRingBuffer_ElementSize(CLR_UINT8 *dataBuffer);
 
 /// <summary>
 /// Indicates whether there are no more messages available.
 /// </summary>
-/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-extern bool NF_RunTime_ISR_DataRingBuffer_IsEmpty (CLR_UINT8 *dataBuffer);
+/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see
+/// cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
+extern bool NF_RunTime_ISR_DataRingBuffer_IsEmpty(CLR_UINT8 *dataBuffer);
 
 /// <summary>
 /// Add data to the buffer.
 /// </summary>
-/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-/// <param name="data">Data to add to the buffer.</param>
-/// <param name="allowOverwrite">Indicates whether the data is added to the ring buffer
-/// even if it overwrites existing data.</param>
-/// <returns>Indicates whether the data has been added. Returns <see langword="false"/>
-/// if <paramref name="allowOverwrite"/> is <see langword="false"/> and the buffer is filled
-/// to capacity.</returns>
-extern bool NF_RunTime_ISR_DataRingBuffer_Push (CLR_UINT8 *dataBuffer, CLR_UINT8 *data, bool allowOverwrite);
+/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see
+/// cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param> <param name="data">Data to add to the buffer.</param> <param
+/// name="allowOverwrite">Indicates whether the data is added to the ring buffer even if it overwrites existing
+/// data.</param> <returns>Indicates whether the data has been added. Returns <see langword="false"/> if <paramref
+/// name="allowOverwrite"/> is <see langword="false"/> and the buffer is filled to capacity.</returns>
+extern bool NF_RunTime_ISR_DataRingBuffer_Push(CLR_UINT8 *dataBuffer, CLR_UINT8 *data, bool allowOverwrite);
 
 /// <summary>
 /// Get the next available element in the buffer.
 /// </summary>
-/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-/// <param name="data">Location to copy the data to.</param>
+/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see
+/// cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param> <param name="data">Location to copy the data to.</param>
 /// <param name="removeFromBuffer">Indicates whether to remove the data (pop) rather than keep it (peek).</param>
 /// <returns>Indicates whether any data has been returned. If <see langword="false"/>, the
 /// <paramref name="data"/> has an undefined value and does not represent any data read from
 /// the buffer.</returns>
-extern bool NF_RunTime_ISR_DataRingBuffer_PeekPop (CLR_UINT8 *dataBuffer, CLR_UINT8 *data, bool removeFromBuffer);
+extern bool NF_RunTime_ISR_DataRingBuffer_PeekPop(CLR_UINT8 *dataBuffer, CLR_UINT8 *data, bool removeFromBuffer);
 
 /// <summary>
 /// Clear the buffer.
 /// </summary>
-/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-extern void NF_RunTime_ISR_DataRingBuffer_Clear (CLR_UINT8 *dataBuffer);
+/// <param name="dataBuffer">Pointer to the memory for the buffer as returned by <see
+/// cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
+extern void NF_RunTime_ISR_DataRingBuffer_Clear(CLR_UINT8 *dataBuffer);
 
 //======================================================================
 //
 // Target-dependent methods.
-// 
+//
 //======================================================================
 #ifdef NF_RUNTIME_ISR_FOR_NANOCLR
 /// <summary>
@@ -335,7 +391,7 @@ extern void NF_RunTime_ISR_DataRingBuffer_Clear (CLR_UINT8 *dataBuffer);
 /// <param name="memoryType">Type of memory to allocate.</param>
 /// <param name="size">Size of the memory to allocate.</param>
 /// <returns>The pointer to the memory, or the null pointer if the memory cannot be allocated.</returns>
-extern void *NF_RunTime_ISR_AllocateMemory (InterpreterMemoryType memoryType, NF_Runtime_ISR_SharedDataOffsetType size);
+extern void *NF_RunTime_ISR_AllocateMemory(InterpreterMemoryType memoryType, NF_Runtime_ISR_SharedDataOffsetType size);
 
 /// <summary>
 /// Release a block of memory
@@ -343,33 +399,33 @@ extern void *NF_RunTime_ISR_AllocateMemory (InterpreterMemoryType memoryType, NF
 /// <param name="memoryType">Type of memory to allocate.</param>
 /// <param name="memory">The allocated memory.</param>
 /// <returns>The pointer to the memory, or the null pointer if the memory cannot be allocated.</returns>
-extern void NF_RunTime_ISR_ReleaseMemory (InterpreterMemoryType memoryType, void *memory);
+extern void NF_RunTime_ISR_ReleaseMemory(InterpreterMemoryType memoryType, void *memory);
 
 /// <summary>
 /// Create a RTOS task to run the service routine.
 /// Call the <see cref="NF_RunTime_ISR_RunServiceRoutine"/> method from the task.
 /// </summary>
 /// <param name="serviceRoutine">Description of the service routine to call.</param>
-extern void NF_RunTime_ISR_RunServiceRoutineInSeparateRTOSTask (NF_Runtime_ISR_ManagedActivation *serviceRoutine);
+extern void NF_RunTime_ISR_RunServiceRoutineInSeparateRTOSTask(NF_Runtime_ISR_ManagedActivation *serviceRoutine);
 
 /// <summary>
 /// Get the size of the memory required to run an RTOS task that calls service routines after
 /// an interrupt has been handled.
 /// </summary>
-extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_GetRTOSTaskMemorySize ();
+extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_GetRTOSTaskMemorySize();
 
 /// <summary>
 /// Enable/start the RTOS task that calls service routines after an interrupt has been handled.
 /// </summary>
 /// <param name="taskData">The memory requested via <see cref="NF_RunTime_ISR_GetRTOSTaskMemorySize"/>.</param>
 /// <param name="queueSize">The number of interrupts that can be queued for execution by the task.</param>
-extern void NF_RunTime_ISR_EnableRTOSTask (void *taskData, NF_Runtime_ISR_HeapOffsetType queueSize);
+extern void NF_RunTime_ISR_EnableRTOSTask(void *taskData, NF_Runtime_ISR_HeapOffsetType queueSize);
 
 /// <summary>
 /// Enable/start the RTOS task that calls service routines after an interrupt has been handled.
 /// </summary>
 /// <param name="taskData">The memory passed to <see cref="NF_RunTime_ISR_EnableRTOSTask"/>.</param>
-extern void NF_RunTime_ISR_DisableRTOSTask (void *taskData);
+extern void NF_RunTime_ISR_DisableRTOSTask(void *taskData);
 #endif
 
 /// <summary>
@@ -378,23 +434,27 @@ extern void NF_RunTime_ISR_DisableRTOSTask (void *taskData);
 /// </summary>
 /// <param name="interruptHandler">Native data required by the native interpreter to run the service routines.</param>
 /// <param name="taskData">Native data required for the administration of the RTOS task.</param>
-extern void NF_RunTime_ISR_QueueRTOSTask (NF_Runtime_ISR_InterruptHandler *interruptHandler, void *taskData);
+extern void NF_RunTime_ISR_QueueRTOSTask(NF_Runtime_ISR_InterruptHandler *interruptHandler, void *taskData);
 
 //======================================================================
 //
 // Support for the implementation of (target independent) interrupt
 // generators.
-// 
+//
 //======================================================================
 #ifdef NF_RUNTIME_ISR_FOR_NANOCLR
 
 /// <summary>
-/// Method to initialise the interrupt handler struct from an argument of type <c>nanoFramework.Runtime.ISR.OnInterruptHandlers</c> that is passed by managed code
-/// as part of the <c>nanoFramework.Runtime.ISR.IInterruptGenerator.Enable</c> implementation.
+/// Method to initialise the interrupt handler struct from an argument of type
+/// <c>nanoFramework.Runtime.ISR.OnInterruptHandlers</c> that is passed by managed code as part of the
+/// <c>nanoFramework.Runtime.ISR.IInterruptGenerator.Enable</c> implementation.
 /// </summary>
-/// <param name="interruptHandler">Native data that the interrupt generator needs to pass to <see cref="NF_RunTime_ISR_HandleInterrupt"/> in the interrupt handler.</param>
-/// <param name="onInterruptHandlerArgument">Argument pass by the managed code.</param>
-extern void NF_RunTime_ISR_InitialiseInterruptHandler (NF_Runtime_ISR_InterruptHandler &interruptHandler, CLR_RT_HeapBlock *onInterruptHandlerArgument);
+/// <param name="interruptHandler">Native data that the interrupt generator needs to pass to <see
+/// cref="NF_RunTime_ISR_HandleInterrupt"/> in the interrupt handler.</param> <param
+/// name="onInterruptHandlerArgument">Argument pass by the managed code.</param>
+extern void NF_RunTime_ISR_InitialiseInterruptHandler(
+    NF_Runtime_ISR_InterruptHandler &interruptHandler,
+    CLR_RT_HeapBlock *onInterruptHandlerArgument);
 
 #endif
 

@@ -5,7 +5,32 @@
 
 #include "NF_Runtime_ISR.h"
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DoAllocateMemory___BOOLEAN__nanoFrameworkRuntimeISRInterpreterMemoryType__U4__BYREF_I4( CLR_RT_StackFrame &stack )
+static void *GetMemoryPointer(CLR_RT_StackFrame &stack)
+{
+    InterpreterMemoryType memoryType = (InterpreterMemoryType)stack.Arg1().NumericByRef().s4;
+    int field;
+    switch (memoryType)
+    {
+        case InterpreterMemoryType::InterpreterMemoryType_ISR:
+            field = Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::FIELD___memoryISR;
+            break;
+        case InterpreterMemoryType::InterpreterMemoryType_Task:
+            field = Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::FIELD___memoryTask;
+            break;
+        case InterpreterMemoryType::InterpreterMemoryType_ManagedActivation:
+            field = Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+                FIELD___memoryManagedActivation;
+            break;
+        default:
+            return nullptr;
+    }
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    return ARG_AS_INTPTR(pThis[field]);
+}
+
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    DoAllocateMemory___BOOLEAN__nanoFrameworkRuntimeISRInterpreterMemoryType__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -16,21 +41,42 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     bool result = false;
     if (memory != nullptr)
     {
-        CLR_RT_HeapBlock hMemory;
-        hMemory.SetInteger((CLR_INT32)memory);
-        NANOCLR_CHECK_HRESULT(hMemory.StoreToReference(stack.Arg3(), 0));
+        memset(memory, 0, size);
+
+        int field;
+        switch (memoryType)
+        {
+            case InterpreterMemoryType::InterpreterMemoryType_ISR:
+                field = Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::FIELD___memoryISR;
+                break;
+            case InterpreterMemoryType::InterpreterMemoryType_Task:
+                field = Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::FIELD___memoryTask;
+                break;
+            case InterpreterMemoryType::InterpreterMemoryType_ManagedActivation:
+                field = Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+                    FIELD___memoryManagedActivation;
+                break;
+            default:
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOTIMPL);
+        }
+
+        CLR_RT_HeapBlock *pThis = stack.This();
+        SET_AS_INTPTR(pThis[field], memory);
+
         result = true;
     }
+
     stack.SetResult_Boolean(result);
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DoAssignMemory___VOID__I4__U4__SZARRAY_U1( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    AssignMemory___VOID__nanoFrameworkRuntimeISRInterpreterMemoryType__U4__SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_UINT8 *memory = (CLR_UINT8 *)ARG_AS_INTPTR(stack.Arg1());
+    CLR_UINT8 *memory = (CLR_UINT8 *)GetMemoryPointer(stack);
     NF_Runtime_ISR_SharedDataOffsetType offset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
     memory += offset;
 
@@ -44,11 +90,12 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DoAssignOffset___VOID__I4__U4__U4( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    AssignOffset___VOID__nanoFrameworkRuntimeISRInterpreterMemoryType__U4__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_UINT8 *memory = (CLR_UINT8 *)ARG_AS_INTPTR(stack.Arg1());
+    CLR_UINT8 *memory = (CLR_UINT8 *)GetMemoryPointer(stack);
     NF_Runtime_ISR_SharedDataOffsetType offsetOffset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
     NF_Runtime_ISR_SharedDataOffsetType offset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg3());
     *(NF_Runtime_ISR_SharedDataOffsetType *)(memory + offsetOffset) = offset;
@@ -56,11 +103,12 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DoIsOffsetAssigned___BOOLEAN__I4__U4( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    IsOffsetAssigned___BOOLEAN__nanoFrameworkRuntimeISRInterpreterMemoryType__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_UINT8 *memory = (CLR_UINT8 *)ARG_AS_INTPTR(stack.Arg1());
+    CLR_UINT8 *memory = (CLR_UINT8 *)GetMemoryPointer(stack);
     NF_Runtime_ISR_SharedDataOffsetType offsetOffset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
     bool isAssigned = 0 != *(NF_Runtime_ISR_SharedDataOffsetType *)(memory + offsetOffset);
     stack.SetResult_Boolean(isAssigned);
@@ -68,11 +116,12 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DoGetMemoryPointer___I4__I4__U4( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    GetMemoryPointer___I4__nanoFrameworkRuntimeISRInterpreterMemoryType__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_UINT8 *memory = (CLR_UINT8 *)ARG_AS_INTPTR(stack.Arg1());
+    CLR_UINT8 *memory = (CLR_UINT8 *)GetMemoryPointer(stack);
     NF_Runtime_ISR_SharedDataOffsetType offset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
     memory += offset;
     SET_RESULT_AS_INTPTR(memory);
@@ -80,11 +129,12 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DoReadMemory___VOID__I4__U4__SZARRAY_U1( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    DoReadMemory___VOID__nanoFrameworkRuntimeISRInterpreterMemoryType__U4__SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_UINT8 *memory = (CLR_UINT8 *)ARG_AS_INTPTR(stack.Arg1());
+    CLR_UINT8 *memory = (CLR_UINT8 *)GetMemoryPointer(stack);
     NF_Runtime_ISR_SharedDataOffsetType offset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
     memory += offset;
     CLR_RT_HeapBlock_Array *array = stack.Arg3().DereferenceArray();
@@ -97,21 +147,38 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DoReleaseMemory___VOID__nanoFrameworkRuntimeISRInterpreterMemoryType__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::ReleaseMemory___VOID(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    InterpreterMemoryType memoryType = (InterpreterMemoryType)stack.Arg1().NumericByRef().s4;
-    void *memory = ARG_AS_INTPTR(stack.Arg2());
-	if (memory != nullptr)
-	{
-		NF_RunTime_ISR_ReleaseMemory(memoryType, memory);
-	}
+    CLR_RT_HeapBlock *pThis = stack.This();
+    void *memory = ARG_AS_INTPTR(
+        pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::FIELD___memoryISR]);
+    if (memory != nullptr)
+    {
+        NF_RunTime_ISR_ReleaseMemory(InterpreterMemoryType::InterpreterMemoryType_ISR, memory);
+    }
+
+    memory = ARG_AS_INTPTR(
+        pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::FIELD___memoryTask]);
+    if (memory != nullptr)
+    {
+        NF_RunTime_ISR_ReleaseMemory(InterpreterMemoryType::InterpreterMemoryType_Task, memory);
+    }
+
+    memory = ARG_AS_INTPTR(pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+                                     FIELD___memoryManagedActivation]);
+    if (memory != nullptr)
+    {
+        NF_RunTime_ISR_ReleaseMemory(InterpreterMemoryType::InterpreterMemoryType_ManagedActivation, memory);
+    }
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::RTOSTask_GetMemorySize___U4( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::RTOSTask_GetMemorySize___U4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -121,18 +188,22 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DoEnableRTOSTask___VOID__I4__U2( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::EnableRTOSTask___VOID__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     void *taskData = ARG_AS_INTPTR(stack.Arg1());
-    NF_Runtime_ISR_HeapOffsetType queueSize = ARG_AS_HEAPOFFSETTYPE(stack.Arg2());
+    CLR_RT_HeapBlock *pThis = stack.This();
+    NF_Runtime_ISR_HeapOffsetType queueSize = ARG_AS_HEAPOFFSETTYPE(
+        pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::FIELD___interruptQueueSize]);
     NF_RunTime_ISR_EnableRTOSTask(taskData, queueSize);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DisableRTOSTask___VOID__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DisableRTOSTask___VOID__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -142,19 +213,21 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DoStartServiceRoutine___VOID__nanoFrameworkRuntimeISROnManagedActivation( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    DoStartServiceRoutine___VOID__nanoFrameworkRuntimeISROnManagedActivation(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock *managedActivationArgument = stack.Arg1().Dereference();
     NF_Runtime_ISR_ManagedActivation managedActivation;
     NF_RunTime_ISR_InitialiseManagedActivation(managedActivation, managedActivationArgument);
-    NF_RunTime_ISR_RunServiceRoutineInSeparateRTOSTask (&managedActivation);
+    NF_RunTime_ISR_RunServiceRoutineInSeparateRTOSTask(&managedActivation);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_GetMemorySize___U4__U4__U2( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    DataBuffer_GetMemorySize___U4__U4__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -166,7 +239,8 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Initialize___VOID__I4__U4__U2( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    DataBuffer_Initialize___VOID__I4__U4__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -179,7 +253,8 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Capacity___U4__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Capacity___U4__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -190,7 +265,8 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Count___U4__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Count___U4__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -201,7 +277,8 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Add___VOID__I4__SZARRAY_U1( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    DataBuffer_Add___VOID__I4__SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -216,7 +293,8 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Insert___VOID__I4__U4__SZARRAY_U1( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    DataBuffer_Insert___VOID__I4__U4__SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -232,7 +310,8 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Get___VOID__I4__U4__SZARRAY_U1( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    DataBuffer_Get___VOID__I4__U4__SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -248,7 +327,8 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Clear___VOID__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Clear___VOID__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -258,7 +338,8 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataRingBuffer_GetMemorySize___U4__U4__U2( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    DataRingBuffer_GetMemorySize___U4__U4__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -270,7 +351,8 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataRingBuffer_Initialize___VOID__I4__U4__U2( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    DataRingBuffer_Initialize___VOID__I4__U4__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -283,7 +365,8 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataRingBuffer_Capacity___U4__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataRingBuffer_Capacity___U4__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -294,7 +377,8 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataRingBuffer_IsEmpty___BOOLEAN__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    DataRingBuffer_IsEmpty___BOOLEAN__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -305,7 +389,8 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataRingBuffer_Push___BOOLEAN__I4__SZARRAY_U1__BOOLEAN( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    DataRingBuffer_Push___BOOLEAN__I4__SZARRAY_U1__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -323,7 +408,8 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataRingBuffer_Peek___BOOLEAN__I4__SZARRAY_U1( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    DataRingBuffer_Peek___BOOLEAN__I4__SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -340,7 +426,8 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataRingBuffer_Pop___BOOLEAN__I4__SZARRAY_U1( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    DataRingBuffer_Pop___BOOLEAN__I4__SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -357,7 +444,8 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataRingBuffer_Clear___VOID__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataRingBuffer_Clear___VOID__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 

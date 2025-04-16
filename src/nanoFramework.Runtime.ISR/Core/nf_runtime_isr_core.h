@@ -31,17 +31,22 @@ struct Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_OnManagedActivation
 
 struct Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager
 {
-    NANOCLR_NATIVE_DECLARE(DoAllocateMemory___BOOLEAN__nanoFrameworkRuntimeISRInterpreterMemoryType__U4__BYREF_I4);
-    NANOCLR_NATIVE_DECLARE(DoAssignMemory___VOID__I4__U4__SZARRAY_U1);
-    NANOCLR_NATIVE_DECLARE(DoAssignOffset___VOID__I4__U4__U4);
-    NANOCLR_NATIVE_DECLARE(DoIsOffsetAssigned___BOOLEAN__I4__U4);
-    NANOCLR_NATIVE_DECLARE(DoGetMemoryPointer___I4__I4__U4);
-    NANOCLR_NATIVE_DECLARE(DoReadMemory___VOID__I4__U4__SZARRAY_U1);
-    NANOCLR_NATIVE_DECLARE(DoReleaseMemory___VOID__nanoFrameworkRuntimeISRInterpreterMemoryType__I4);
-    NANOCLR_NATIVE_DECLARE(RTOSTask_GetMemorySize___U4);
-    NANOCLR_NATIVE_DECLARE(DoEnableRTOSTask___VOID__I4__U2);
-    NANOCLR_NATIVE_DECLARE(DisableRTOSTask___VOID__I4);
+    static const int FIELD___memoryISR = 1;
+    static const int FIELD___memoryTask = 2;
+    static const int FIELD___memoryManagedActivation = 3;
+    static const int FIELD___interruptQueueSize = 4;
+
+    NANOCLR_NATIVE_DECLARE(DoAllocateMemory___BOOLEAN__nanoFrameworkRuntimeISRInterpreterMemoryType__U4);
+    NANOCLR_NATIVE_DECLARE(AssignMemory___VOID__nanoFrameworkRuntimeISRInterpreterMemoryType__U4__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(AssignOffset___VOID__nanoFrameworkRuntimeISRInterpreterMemoryType__U4__U4);
+    NANOCLR_NATIVE_DECLARE(IsOffsetAssigned___BOOLEAN__nanoFrameworkRuntimeISRInterpreterMemoryType__U4);
+    NANOCLR_NATIVE_DECLARE(GetMemoryPointer___I4__nanoFrameworkRuntimeISRInterpreterMemoryType__U4);
+    NANOCLR_NATIVE_DECLARE(DoReadMemory___VOID__nanoFrameworkRuntimeISRInterpreterMemoryType__U4__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(ReleaseMemory___VOID);
     NANOCLR_NATIVE_DECLARE(DoStartServiceRoutine___VOID__nanoFrameworkRuntimeISROnManagedActivation);
+    NANOCLR_NATIVE_DECLARE(RTOSTask_GetMemorySize___U4);
+    NANOCLR_NATIVE_DECLARE(EnableRTOSTask___VOID__I4);
+    NANOCLR_NATIVE_DECLARE(DisableRTOSTask___VOID__I4);
     NANOCLR_NATIVE_DECLARE(DataBuffer_GetMemorySize___U4__U4__U2);
     NANOCLR_NATIVE_DECLARE(DataBuffer_Initialize___VOID__I4__U4__U2);
     NANOCLR_NATIVE_DECLARE(DataBuffer_Capacity___U4__I4);
