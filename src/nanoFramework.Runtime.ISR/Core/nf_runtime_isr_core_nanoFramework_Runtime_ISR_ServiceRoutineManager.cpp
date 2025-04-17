@@ -122,7 +122,8 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_HEADER();
 
     CLR_UINT8 *memory = (CLR_UINT8 *)GetMemoryPointer(stack);
-    NF_Runtime_ISR_SharedDataOffsetType offset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
+    NF_Runtime_ISR_SharedDataOffsetType offsetOffset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
+    NF_Runtime_ISR_SharedDataOffsetType offset = *(NF_Runtime_ISR_SharedDataOffsetType *)(memory + offsetOffset);
     memory += offset;
     SET_RESULT_AS_INTPTR(memory);
 
@@ -158,6 +159,9 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     if (memory != nullptr)
     {
         NF_RunTime_ISR_ReleaseMemory(InterpreterMemoryType::InterpreterMemoryType_ISR, memory);
+        SET_AS_INTPTR(
+            pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::FIELD___memoryISR],
+            0);
     }
 
     memory = ARG_AS_INTPTR(
@@ -165,6 +169,9 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     if (memory != nullptr)
     {
         NF_RunTime_ISR_ReleaseMemory(InterpreterMemoryType::InterpreterMemoryType_Task, memory);
+        SET_AS_INTPTR(
+            pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::FIELD___memoryTask],
+            0);
     }
 
     memory = ARG_AS_INTPTR(pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
@@ -172,6 +179,10 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     if (memory != nullptr)
     {
         NF_RunTime_ISR_ReleaseMemory(InterpreterMemoryType::InterpreterMemoryType_ManagedActivation, memory);
+        SET_AS_INTPTR(
+            pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+                      FIELD___memoryManagedActivation],
+            0);
     }
 
     NANOCLR_NOCLEANUP_NOLABEL();

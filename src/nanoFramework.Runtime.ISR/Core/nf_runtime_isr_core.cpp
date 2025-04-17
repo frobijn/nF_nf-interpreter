@@ -43,6 +43,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DoAllocateMemory___BOOLEAN__nanoFrameworkRuntimeISRInterpreterMemoryType__U4,
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::AssignMemory___VOID__nanoFrameworkRuntimeISRInterpreterMemoryType__U4__SZARRAY_U1,
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::AssignOffset___VOID__nanoFrameworkRuntimeISRInterpreterMemoryType__U4__U4,
