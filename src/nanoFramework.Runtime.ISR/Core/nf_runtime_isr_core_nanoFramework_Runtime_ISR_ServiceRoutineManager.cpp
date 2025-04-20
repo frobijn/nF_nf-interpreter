@@ -185,54 +185,117 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
             0);
     }
 
+    memory = ARG_AS_INTPTR(pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+                                     FIELD___memoryAfterInterruptTask]);
+    if (memory != nullptr)
+    {
+        NF_RunTime_ISR_ReleaseRTOSTaskData(memory);
+        SET_AS_INTPTR(
+            pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+                      FIELD___memoryAfterInterruptTask],
+            0);
+    }
+
+    memory = ARG_AS_INTPTR(pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+                                     FIELD___memoryManagedActivationTask]);
+    if (memory != nullptr)
+    {
+        NF_RunTime_ISR_ReleaseManagedActivationTaskData(memory);
+        SET_AS_INTPTR(
+            pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+                      FIELD___memoryManagedActivationTask],
+            0);
+    }
+
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::RTOSTask_GetMemorySize___U4(
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DoEnableRTOSTask___VOID(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    NF_Runtime_ISR_SharedDataOffsetType result = NF_RunTime_ISR_GetRTOSTaskMemorySize();
-    SET_RESULT_AS_SHAREDDATAOFFSETTYPE(result);
-
-    NANOCLR_NOCLEANUP_NOLABEL();
-}
-
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::EnableRTOSTask___VOID__I4(
-    CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    void *taskData = ARG_AS_INTPTR(stack.Arg1());
     CLR_RT_HeapBlock *pThis = stack.This();
+    void *taskData = ARG_AS_INTPTR(pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+                                             FIELD___memoryAfterInterruptTask]);
+    if (taskData == nullptr)
+    {
+        taskData = NF_RunTime_ISR_AllocateRTOSTaskData();
+        SET_AS_INTPTR(
+            pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+                      FIELD___memoryAfterInterruptTask],
+            taskData);
+    }
+
     NF_Runtime_ISR_HeapOffsetType queueSize = ARG_AS_HEAPOFFSETTYPE(
         pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::FIELD___interruptQueueSize]);
+
     NF_RunTime_ISR_EnableRTOSTask(taskData, queueSize);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DisableRTOSTask___VOID__I4(
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DisableRTOSTask___VOID(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    void *taskData = ARG_AS_INTPTR(stack.Arg1());
+    CLR_RT_HeapBlock *pThis = stack.This();
+    void *taskData = ARG_AS_INTPTR(pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+                                             FIELD___memoryAfterInterruptTask]);
     NF_RunTime_ISR_DisableRTOSTask(taskData);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
-    DoStartServiceRoutine___VOID__nanoFrameworkRuntimeISROnManagedActivation(CLR_RT_StackFrame &stack)
+    DoStartServiceRoutine___VOID__nanoFrameworkRuntimeISROnManagedActivation__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock *managedActivationArgument = stack.Arg1().Dereference();
+
     NF_Runtime_ISR_ManagedActivation managedActivation;
     NF_RunTime_ISR_InitialiseManagedActivation(managedActivation, managedActivationArgument);
-    NF_RunTime_ISR_RunServiceRoutineInSeparateRTOSTask(&managedActivation);
+
+    bool inTask = (bool)stack.Arg2().NumericByRef().u1;
+    if (inTask)
+    {
+        CLR_RT_HeapBlock *pThis = stack.This();
+        void *taskData =
+            ARG_AS_INTPTR(pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+                                    FIELD___memoryManagedActivationTask]);
+        if (taskData == nullptr)
+        {
+            taskData = NF_RunTime_ISR_AllocateManagedActivationTaskData();
+            SET_AS_INTPTR(
+                pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+                          FIELD___memoryManagedActivationTask],
+                taskData);
+        }
+
+        NF_RunTime_ISR_StartManagedActivationTask(taskData, &managedActivation);
+    }
+    else
+    {
+        NF_RunTime_ISR_RunServiceRoutine(&managedActivation);
+    }
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+    StopManagedActivatedServiceRoutine___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    void *taskData = ARG_AS_INTPTR(pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
+                                             FIELD___memoryManagedActivationTask]);
+    if (taskData != nullptr)
+    {
+        NF_RunTime_ISR_StopManagedActivationTask(taskData);
+    }
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }

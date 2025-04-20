@@ -123,6 +123,8 @@ typedef struct __nfpack NF_Runtime_ISR_InterruptHandler
     /// value.</summary>
     NF_Runtime_ISR_SharedDataOffsetType AfterInterruptOffset;
 #ifdef NF_RUNTIME_ISR_FOR_NANOCLR
+    /// <summary>Initialise this value with the <c>OnInterruptHandlers._taskMemory</c> property value.</summary>
+    void *TaskMemory;
     /// <summary>Initialise this value with the <c>OnInterruptHandlers._managerId</c> property value.</summary>
     CLR_UINT32 ServiceManagerId;
 #endif
@@ -411,29 +413,59 @@ extern void *NF_RunTime_ISR_AllocateMemory(InterpreterMemoryType memoryType, NF_
 extern void NF_RunTime_ISR_ReleaseMemory(InterpreterMemoryType memoryType, void *memory);
 
 /// <summary>
+/// Allocate the memory required to run an RTOS task that runs the service routine
+/// that is started from managed code.
+/// </summary>
+extern void *NF_RunTime_ISR_AllocateManagedActivationTaskData();
+
+/// <summary>
+/// Release the memory required to run an RTOS task that runs the service routine
+/// that is started from managed code.
+/// </summary>
+/// <param name="taskData">The memory returned by
+/// <see cref="NF_RunTime_ISR_AllocateManagedActivationTaskData"/>.</param>
+extern void NF_RunTime_ISR_ReleaseManagedActivationTaskData(void *taskData);
+
+/// <summary>
 /// Create a RTOS task to run the service routine.
 /// Call the <see cref="NF_RunTime_ISR_RunServiceRoutine"/> method from the task.
 /// </summary>
+/// <param name="taskData">The memory returned by
+/// <see cref="NF_RunTime_ISR_AllocateManagedActivationTaskData"/>.</param>
 /// <param name="serviceRoutine">Description of the service routine to call.</param>
-extern void NF_RunTime_ISR_RunServiceRoutineInSeparateRTOSTask(NF_Runtime_ISR_ManagedActivation *serviceRoutine);
+extern void NF_RunTime_ISR_StartManagedActivationTask(void *taskData, NF_Runtime_ISR_ManagedActivation *serviceRoutine);
 
 /// <summary>
-/// Get the size of the memory required to run an RTOS task that calls service routines after
+/// Stop the RTOS task started by <see cref="NF_RunTime_ISR_StartManagedActivationTask"/>.
+/// </summary>
+/// <param name="taskData">The memory returned by
+/// <see cref="NF_RunTime_ISR_AllocateManagedActivationTaskData"/>.</param>
+extern void NF_RunTime_ISR_StopManagedActivationTask(void *taskData);
+
+/// <summary>
+/// Allocate the memory required to run an RTOS task that calls service routines after
 /// an interrupt has been handled.
 /// </summary>
-extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_GetRTOSTaskMemorySize();
+extern void *NF_RunTime_ISR_AllocateRTOSTaskData();
+
+/// <summary>
+/// Release the memory required to run an RTOS task that calls service routines after
+/// an interrupt has been handled.
+/// </summary>
+/// <param name="taskData">The memory returned by <see cref="NF_RunTime_ISR_AllocateRTOSTaskData"/>.</param>
+extern void NF_RunTime_ISR_ReleaseRTOSTaskData(void *taskData);
 
 /// <summary>
 /// Enable/start the RTOS task that calls service routines after an interrupt has been handled.
 /// </summary>
-/// <param name="taskData">The memory requested via <see cref="NF_RunTime_ISR_GetRTOSTaskMemorySize"/>.</param>
+/// <param name="taskData">The memory returned by <see cref="NF_RunTime_ISR_AllocateRTOSTaskData"/>.</param>
 /// <param name="queueSize">The number of interrupts that can be queued for execution by the task.</param>
 extern void NF_RunTime_ISR_EnableRTOSTask(void *taskData, NF_Runtime_ISR_HeapOffsetType queueSize);
 
 /// <summary>
 /// Enable/start the RTOS task that calls service routines after an interrupt has been handled.
 /// </summary>
-/// <param name="taskData">The memory passed to <see cref="NF_RunTime_ISR_EnableRTOSTask"/>.</param>
+/// <param name="taskData">The memory returned by <see cref="NF_RunTime_ISR_AllocateRTOSTaskData"/>.</param>
 extern void NF_RunTime_ISR_DisableRTOSTask(void *taskData);
 #endif
 
@@ -442,8 +474,7 @@ extern void NF_RunTime_ISR_DisableRTOSTask(void *taskData);
 /// Call the <see cref="NF_RunTime_ISR_RunFromRTOSTask"/> method from the task.
 /// </summary>
 /// <param name="interruptHandler">Native data required by the native interpreter to run the service routines.</param>
-/// <param name="taskData">Native data required for the administration of the RTOS task.</param>
-extern void NF_RunTime_ISR_QueueRTOSTask(NF_Runtime_ISR_InterruptHandler *interruptHandler, void *taskData);
+extern void NF_RunTime_ISR_QueueRTOSTask(NF_Runtime_ISR_InterruptHandler *interruptHandler);
 
 //======================================================================
 //

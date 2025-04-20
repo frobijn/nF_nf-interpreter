@@ -54,10 +54,11 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DoReadMemory___VOID__nanoFrameworkRuntimeISRInterpreterMemoryType__U4__SZARRAY_U1,
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::ReleaseMemory___VOID,
     NULL,
-    Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DoStartServiceRoutine___VOID__nanoFrameworkRuntimeISROnManagedActivation,
-    Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::RTOSTask_GetMemorySize___U4,
-    Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::EnableRTOSTask___VOID__I4,
-    Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DisableRTOSTask___VOID__I4,
+    Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DoStartServiceRoutine___VOID__nanoFrameworkRuntimeISROnManagedActivation__BOOLEAN,
+    Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::StopManagedActivatedServiceRoutine___VOID,
+    NULL,
+    Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DoEnableRTOSTask___VOID,
+    Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DisableRTOSTask___VOID,
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_GetMemorySize___U4__U4__U2,
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Initialize___VOID__I4__U4__U2,
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Capacity___U4__I4,
@@ -106,7 +107,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_ISR_Core =
 {
     "nanoFramework.Runtime.ISR.Core",
-    0x47692586,
+    0x9735116C,
     method_lookup,
     { 1, 0, 0, 0 }
 };

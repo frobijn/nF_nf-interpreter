@@ -34,7 +34,9 @@ struct Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManag
     static const int FIELD___memoryISR = 1;
     static const int FIELD___memoryTask = 2;
     static const int FIELD___memoryManagedActivation = 3;
-    static const int FIELD___interruptQueueSize = 4;
+    static const int FIELD___memoryAfterInterruptTask = 4;
+    static const int FIELD___memoryManagedActivationTask = 5;
+    static const int FIELD___interruptQueueSize = 6;
 
     NANOCLR_NATIVE_DECLARE(DoAllocateMemory___BOOLEAN__nanoFrameworkRuntimeISRInterpreterMemoryType__U4);
     NANOCLR_NATIVE_DECLARE(AssignMemory___VOID__nanoFrameworkRuntimeISRInterpreterMemoryType__U4__SZARRAY_U1);
@@ -43,10 +45,10 @@ struct Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManag
     NANOCLR_NATIVE_DECLARE(GetMemoryPointer___I4__nanoFrameworkRuntimeISRInterpreterMemoryType__U4);
     NANOCLR_NATIVE_DECLARE(DoReadMemory___VOID__nanoFrameworkRuntimeISRInterpreterMemoryType__U4__SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(ReleaseMemory___VOID);
-    NANOCLR_NATIVE_DECLARE(DoStartServiceRoutine___VOID__nanoFrameworkRuntimeISROnManagedActivation);
-    NANOCLR_NATIVE_DECLARE(RTOSTask_GetMemorySize___U4);
-    NANOCLR_NATIVE_DECLARE(EnableRTOSTask___VOID__I4);
-    NANOCLR_NATIVE_DECLARE(DisableRTOSTask___VOID__I4);
+    NANOCLR_NATIVE_DECLARE(DoStartServiceRoutine___VOID__nanoFrameworkRuntimeISROnManagedActivation__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(StopManagedActivatedServiceRoutine___VOID);
+    NANOCLR_NATIVE_DECLARE(DoEnableRTOSTask___VOID);
+    NANOCLR_NATIVE_DECLARE(DisableRTOSTask___VOID);
     NANOCLR_NATIVE_DECLARE(DataBuffer_GetMemorySize___U4__U4__U2);
     NANOCLR_NATIVE_DECLARE(DataBuffer_Initialize___VOID__I4__U4__U2);
     NANOCLR_NATIVE_DECLARE(DataBuffer_Capacity___U4__I4);
@@ -75,7 +77,8 @@ struct Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_OnInterruptHandlers
     static const int FIELD___afterInterruptMemory = 4;
     static const int FIELD___afterInterruptSetArgumentsOffset = 5;
     static const int FIELD___afterInterruptOffset = 6;
-    static const int FIELD___managerId = 7;
+    static const int FIELD___taskMemory = 7;
+    static const int FIELD___managerId = 8;
 
     //--//
 };
