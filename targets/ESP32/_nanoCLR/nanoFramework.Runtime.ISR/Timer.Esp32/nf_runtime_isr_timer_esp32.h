@@ -1,15 +1,7 @@
-//-----------------------------------------------------------------------------
 //
-//                   ** WARNING! ** 
-//    This file was generated automatically by a tool.
-//    Re-running the tool will overwrite this file.
-//    You should copy this file to a custom location
-//    before adding any customization in the copy to
-//    prevent loss of your changes when the tool is
-//    re-run.
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
 //
-//-----------------------------------------------------------------------------
-
 #ifndef NF_RUNTIME_ISR_TIMER_ESP32_H
 #define NF_RUNTIME_ISR_TIMER_ESP32_H
 
@@ -18,11 +10,16 @@
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
 
-struct Library_nf_runtime_isr_timer_esp32_nanoFramework_Runtime_ISR_Esp32_OnHighResTimerInterrupt
+struct Library_nf_runtime_isr_timer_esp32_nanoFramework_Runtime_ISR_Esp32_TimerInterruptBase
 {
-    NANOCLR_NATIVE_DECLARE(GetNativeMemorySize___U4);
-    NANOCLR_NATIVE_DECLARE(Disable___VOID__I4);
-    NANOCLR_NATIVE_DECLARE(Enable___VOID__I4__nanoFrameworkRuntimeISROnInterruptHandlers__nanoFrameworkHardwareEsp32HighResTimer);
+    static const int FIELD___singleShot = 1;
+    static const int FIELD___timer = 2;
+    static const int FIELD___initialInterval = 3;
+
+    NANOCLR_NATIVE_DECLARE(GetInterruptGeneratorMemorySize___U4);
+    NANOCLR_NATIVE_DECLARE(EnableInterruptGenerator___VOID__I4__nanoFrameworkRuntimeISROnInterruptHandlers);
+    NANOCLR_NATIVE_DECLARE(GetDataBusMemorySize___U4);
+    NANOCLR_NATIVE_DECLARE(InitialiseDataBus___VOID__I4);
 
     //--//
 };

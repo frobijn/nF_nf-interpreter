@@ -5,17 +5,43 @@
 //
 
 #include "nanoFramework_hardware_esp32_native.h"
+#include "CLR_IncludedAPI.h"
+#ifdef API_nanoFramework_Runtime_ISR_Timer_Esp32
+#include "nf_runtime_isr_timer_esp32_highrestimer.h"
+#endif
 
 #define MAX_HRTIMERS 10
 
+#ifdef API_nanoFramework_Runtime_ISR_Timer_Esp32
+
+typedef struct __nfpack EspTimer
+{
+    esp_timer_handle_t Timer;
+    NF_Runtime_ISR_InterruptHandler *ServiceRoutine;
+} EspTimer;
+
+EspTimer hrtimers[MAX_HRTIMERS] = {};
+
+#define ESP32_TIMER_HANDLE(index) hrtimers[index].Timer
+
+#else
 esp_timer_handle_t hrtimers[MAX_HRTIMERS] = {};
+
+#define ESP32_TIMER_HANDLE(index) hrtimers[index]
+
+#endif
 
 static int FindNextTimerIndex()
 {
     for (int index = 0; index < MAX_HRTIMERS; index++)
     {
-        if (hrtimers[index] == 0)
+        if (ESP32_TIMER_HANDLE(index) == 0)
+        {
+#ifdef API_nanoFramework_Runtime_ISR_Timer_Esp32
+            hrtimers[index].ServiceRoutine = nullptr;
+#endif
             return index;
+        }
     }
 
     return -1;
@@ -23,9 +49,46 @@ static int FindNextTimerIndex()
 
 static void HRtimer_callback(void *arg)
 {
-    esp_timer_handle_t timer_handle = hrtimers[(int)arg];
+#ifdef API_nanoFramework_Runtime_ISR_Timer_Esp32
+    if (hrtimers[(int)arg].ServiceRoutine != nullptr)
+    {
+        NF_RunTime_ISR_HandleInterrupt(hrtimers[(int)arg].ServiceRoutine, 0);
+        return;
+    }
+#endif
+
+    esp_timer_handle_t timer_handle = ESP32_TIMER_HANDLE((int)arg);
     PostManagedEvent(EVENT_HIGH_RESOLUTION_TIMER, HighResTimerEventType_TimerExpired, 0, (uint32_t)timer_handle);
 }
+
+#ifdef API_nanoFramework_Runtime_ISR_Timer_Esp32
+void NF_RunTime_ISR_InitialiseHighResTimer(
+    CLR_RT_HeapBlock *timer,
+    NF_Runtime_ISR_InterruptHandler *interruptHandlerData)
+{
+    esp_timer_handle_t handle = NF_RunTime_ISR_GetTimerHandle(timer);
+    for (int index = 0; index < MAX_HRTIMERS; index++)
+    {
+        if (ESP32_TIMER_HANDLE(index) == handle)
+        {
+            hrtimers[index].ServiceRoutine = interruptHandlerData;
+            break;
+        }
+    }
+}
+
+esp_timer_handle_t NF_RunTime_ISR_GetTimerHandle(CLR_RT_HeapBlock *timer)
+{
+    if (timer == nullptr)
+    {
+        return 0;
+    }
+    return (esp_timer_handle_t)timer
+        [Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimer::FIELD___timerHandle]
+            .NumericByRefConst()
+            .s4;
+}
+#endif
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimer::
     NativeEspTimerCreate___I4(CLR_RT_StackFrame &stack)
@@ -46,7 +109,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
-        hrtimers[index] = out_handle;
+        ESP32_TIMER_HANDLE(index) = out_handle;
         stack.SetResult_I4((int32_t)out_handle);
     }
     NANOCLR_NOCLEANUP();
@@ -64,9 +127,9 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
         for (int index = 0; index < MAX_HRTIMERS; index++)
         {
-            if (hrtimers[index] == timer)
+            if (ESP32_TIMER_HANDLE(index) == timer)
             {
-                hrtimers[index] = 0;
+                ESP32_TIMER_HANDLE(index) = 0;
                 break;
             }
         }

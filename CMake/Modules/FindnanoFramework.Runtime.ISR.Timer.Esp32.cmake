@@ -21,7 +21,6 @@ set(nanoFramework.Runtime.ISR.Timer.Esp32_SRCS
 
     nf_runtime_isr_timer_esp32_native.cpp
     nf_runtime_isr_timer_esp32.cpp
-    nf_runtime_isr_timer_esp32_nanoFramework_Runtime_ISR_Esp32_OnHighResTimerInterrupt.cpp
 
 )
 
