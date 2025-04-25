@@ -19,10 +19,8 @@ list(APPEND nanoFramework.Runtime.ISR.Gpio_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/sr
 # source files
 set(nanoFramework.Runtime.ISR.Gpio_SRCS
 
-    nf_runtime_isr_gpio_native.cpp
     nf_runtime_isr_gpio.cpp
     nf_runtime_isr_gpio_nanoFramework_Runtime_ISR_GpioPin.cpp
-    nf_runtime_isr_gpio_nanoFramework_Runtime_ISR_GpioPin__OnValueChangedInterrupt.cpp
 
 )
 

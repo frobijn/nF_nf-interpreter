@@ -2,15 +2,15 @@
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
-#ifndef NF_RUNTIME_ISR_TIMER_ESP32_H
-#define NF_RUNTIME_ISR_TIMER_ESP32_H
+#ifndef NF_RUNTIME_ISR_TIMER_H
+#define NF_RUNTIME_ISR_TIMER_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
 
-struct Library_nf_runtime_isr_timer_esp32_nanoFramework_Runtime_ISR_Esp32_TimerInterruptBase
+struct Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase
 {
     static const int FIELD___singleShot = 1;
     static const int FIELD___timer = 2;
@@ -24,6 +24,6 @@ struct Library_nf_runtime_isr_timer_esp32_nanoFramework_Runtime_ISR_Esp32_TimerI
     //--//
 };
 
-extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_ISR_Timer_Esp32;
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_ISR_Timer;
 
-#endif // NF_RUNTIME_ISR_TIMER_ESP32_H
+#endif // NF_RUNTIME_ISR_TIMER_H

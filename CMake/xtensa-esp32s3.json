@@ -46,7 +46,7 @@
                 "API_nanoFramework.Runtime.ISR.I2c.Peripheral": "ON",
                 "API_nanoFramework.Runtime.ISR.Pwm": "ON",
                 "API_nanoFramework.Runtime.ISR.Spi": "ON",
-                "API_nanoFramework.Runtime.ISR.Timer.Esp32": "ON",
+                "API_nanoFramework.Runtime.ISR.Timer": "ON",
                 "API_nanoFramework.System.Collections": "ON",
                 "API_nanoFramework.System.Text": "ON",
                 "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "256 * 1024"

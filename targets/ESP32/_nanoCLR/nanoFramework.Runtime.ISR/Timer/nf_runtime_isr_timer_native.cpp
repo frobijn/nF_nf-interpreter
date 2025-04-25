@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "nf_runtime_isr_timer_esp32.h"
+#include "nf_runtime_isr_timer.h"
 #include "nf_runtime_isr_timer_esp32_highrestimer.h"
 
 //----------------------------------------------------------------------
@@ -12,8 +12,8 @@
 //
 //----------------------------------------------------------------------
 
-HRESULT Library_nf_runtime_isr_timer_esp32_nanoFramework_Runtime_ISR_Esp32_TimerInterruptBase::
-    GetInterruptGeneratorMemorySize___U4(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::GetInterruptGeneratorMemorySize___U4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -23,7 +23,7 @@ HRESULT Library_nf_runtime_isr_timer_esp32_nanoFramework_Runtime_ISR_Esp32_Timer
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_timer_esp32_nanoFramework_Runtime_ISR_Esp32_TimerInterruptBase::
+HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::
     EnableInterruptGenerator___VOID__I4__nanoFrameworkRuntimeISROnInterruptHandlers(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -36,7 +36,7 @@ HRESULT Library_nf_runtime_isr_timer_esp32_nanoFramework_Runtime_ISR_Esp32_Timer
         NF_RunTime_ISR_InitialiseInterruptHandler(*interruptData, interruptHandlers);
 
         NF_RunTime_ISR_InitialiseHighResTimer(
-            pThis[Library_nf_runtime_isr_timer_esp32_nanoFramework_Runtime_ISR_Esp32_TimerInterruptBase::FIELD___timer]
+            pThis[Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::FIELD___timer]
                 .Dereference(),
             interruptData);
     }
@@ -88,8 +88,8 @@ static void DataBusSetOneShot(
     esp_timer_start_once(timer, *(CLR_UINT64 *)dataPtr);
 }
 
-HRESULT Library_nf_runtime_isr_timer_esp32_nanoFramework_Runtime_ISR_Esp32_TimerInterruptBase::
-    GetDataBusMemorySize___U4(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::GetDataBusMemorySize___U4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -99,8 +99,8 @@ HRESULT Library_nf_runtime_isr_timer_esp32_nanoFramework_Runtime_ISR_Esp32_Timer
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_timer_esp32_nanoFramework_Runtime_ISR_Esp32_TimerInterruptBase::
-    InitialiseDataBus___VOID__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::InitialiseDataBus___VOID__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -110,12 +110,11 @@ HRESULT Library_nf_runtime_isr_timer_esp32_nanoFramework_Runtime_ISR_Esp32_Timer
         TimerAsDataBusData *dataBus = (TimerAsDataBusData *)ARG_AS_INTPTR(stack.Arg1());
 
         dataBus->Timer = NF_RunTime_ISR_GetTimerHandle(
-            pThis[Library_nf_runtime_isr_timer_esp32_nanoFramework_Runtime_ISR_Esp32_TimerInterruptBase::FIELD___timer]
+            pThis[Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::FIELD___timer]
                 .Dereference());
 
         dataBus->Methods.Read = DataBusGetCurrentTime;
-        if (pThis[Library_nf_runtime_isr_timer_esp32_nanoFramework_Runtime_ISR_Esp32_TimerInterruptBase::
-                      FIELD___singleShot]
+        if (pThis[Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::FIELD___singleShot]
                 .NumericByRef()
                 .s4 == 0)
         {

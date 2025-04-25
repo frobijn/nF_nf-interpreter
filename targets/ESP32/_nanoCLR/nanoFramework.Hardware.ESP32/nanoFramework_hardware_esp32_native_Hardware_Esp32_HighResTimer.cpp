@@ -6,18 +6,18 @@
 
 #include "nanoFramework_hardware_esp32_native.h"
 #include "CLR_IncludedAPI.h"
-#ifdef API_nanoFramework_Runtime_ISR_Timer_Esp32
+#ifdef API_nanoFramework_Runtime_ISR_Timer
 #include "nf_runtime_isr_timer_esp32_highrestimer.h"
 #endif
 
 #define MAX_HRTIMERS 10
 
-#ifdef API_nanoFramework_Runtime_ISR_Timer_Esp32
+#ifdef API_nanoFramework_Runtime_ISR_Timer
 
 typedef struct __nfpack EspTimer
 {
     esp_timer_handle_t Timer;
-    NF_Runtime_ISR_InterruptHandler *ServiceRoutine;
+    NF_Runtime_ISR_InterruptHandler *InterruptHandler;
 } EspTimer;
 
 EspTimer hrtimers[MAX_HRTIMERS] = {};
@@ -37,8 +37,8 @@ static int FindNextTimerIndex()
     {
         if (ESP32_TIMER_HANDLE(index) == 0)
         {
-#ifdef API_nanoFramework_Runtime_ISR_Timer_Esp32
-            hrtimers[index].ServiceRoutine = nullptr;
+#ifdef API_nanoFramework_Runtime_ISR_Timer
+            hrtimers[index].InterruptHandler = nullptr;
 #endif
             return index;
         }
@@ -49,10 +49,10 @@ static int FindNextTimerIndex()
 
 static void HRtimer_callback(void *arg)
 {
-#ifdef API_nanoFramework_Runtime_ISR_Timer_Esp32
-    if (hrtimers[(int)arg].ServiceRoutine != nullptr)
+#ifdef API_nanoFramework_Runtime_ISR_Timer
+    if (hrtimers[(int)arg].InterruptHandler != nullptr)
     {
-        NF_RunTime_ISR_HandleInterrupt(hrtimers[(int)arg].ServiceRoutine, 0);
+        NF_RunTime_ISR_HandleInterrupt(hrtimers[(int)arg].InterruptHandler, 0);
         return;
     }
 #endif
@@ -61,7 +61,7 @@ static void HRtimer_callback(void *arg)
     PostManagedEvent(EVENT_HIGH_RESOLUTION_TIMER, HighResTimerEventType_TimerExpired, 0, (uint32_t)timer_handle);
 }
 
-#ifdef API_nanoFramework_Runtime_ISR_Timer_Esp32
+#ifdef API_nanoFramework_Runtime_ISR_Timer
 void NF_RunTime_ISR_InitialiseHighResTimer(
     CLR_RT_HeapBlock *timer,
     NF_Runtime_ISR_InterruptHandler *interruptHandlerData)
@@ -71,7 +71,7 @@ void NF_RunTime_ISR_InitialiseHighResTimer(
     {
         if (ESP32_TIMER_HANDLE(index) == handle)
         {
-            hrtimers[index].ServiceRoutine = interruptHandlerData;
+            hrtimers[index].InterruptHandler = interruptHandlerData;
             break;
         }
     }

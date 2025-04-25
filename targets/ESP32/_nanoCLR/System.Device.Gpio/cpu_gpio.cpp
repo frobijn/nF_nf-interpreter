@@ -61,6 +61,11 @@ struct gpio_input_state : public HAL_DblLinkedNode<gpio_input_state>
     bool current;                          // Current state
     bool expected;                         // Expected state for debounce handler
     bool waitingDebounce;                  // True if waiting for debounce timer to complete
+#ifdef API_nanoFramework_Runtime_ISR_Gpio
+    GPIO_INT_EDGE userEdge;                             // Edge setting for user ISR interrupt
+    GPIO_NATIVE_INTERRUPT_SERVICE_ROUTINE isrNativePtr; // Ptr to native ISR or null
+    void *paramNative;                                  // Param to native isr call
+#endif
 };
 
 static HAL_DblLinkedList<gpio_input_state> gpioInputList; // Double Linkedlist for GPIO input status
@@ -309,6 +314,23 @@ static void gpio_isr(void *arg)
     NATIVE_INTERRUPT_START
 
     gpio_input_state *state = (gpio_input_state *)arg;
+
+    bool actual;
+#ifdef API_nanoFramework_Runtime_ISR_Gpio
+    if (state->isrNativePtr != NULL)
+    {
+        actual = CPU_GPIO_GetPinState(state->pinNumber);
+        state->isrNativePtr(
+            state->paramNative,
+            actual ? GpioPinValue::GpioPinValue_High : GpioPinValue::GpioPinValue_Low);
+    }
+#endif
+
+    if (state->isrPtr == NULL)
+    {
+        return;
+    }
+
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
     // Ignore any pin changes if waiting for debounce timeout to occur
@@ -317,8 +339,15 @@ static void gpio_isr(void *arg)
         return;
     }
 
-    // get current pin state
-    bool actual = CPU_GPIO_GetPinState(state->pinNumber);
+#ifdef API_nanoFramework_Runtime_ISR_Gpio
+    if (state->isrNativePtr == NULL)
+    {
+#endif
+        // get current pin state
+        actual = CPU_GPIO_GetPinState(state->pinNumber);
+#ifdef API_nanoFramework_Runtime_ISR_Gpio
+    }
+#endif
 
     if (state->debounceMs > 0)
     {
@@ -338,12 +367,38 @@ static void gpio_isr(void *arg)
     }
     else
     {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
         state->current = actual;
+#pragma GCC diagnostic pop
         // just fire event
         state->isrPtr(state->pinNumber, actual, state->param);
     }
 
     NATIVE_INTERRUPT_END
+}
+
+static bool EnableInterrupt(GPIO_PIN pinNumber, GPIO_INT_EDGE intEdge, gpio_input_state *state)
+{
+    esp_err_t ret = gpio_isr_handler_add((gpio_num_t)pinNumber, gpio_isr, (void *)state);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Add interrupt to gpio pin failed");
+        return false;
+    }
+
+    // Map Interrupt edge to ESP32 edge
+    // NONE=0, EDGE_LOW=1, EDGE_HIGH=2, EDGE_BOTH=3, LEVEL_HIGH=4, LEVEL_LOW
+    uint8_t mapint[6] = {
+        GPIO_INTR_DISABLE,
+        GPIO_INTR_NEGEDGE,
+        GPIO_INTR_POSEDGE,
+        GPIO_INTR_ANYEDGE,
+        GPIO_INTR_HIGH_LEVEL,
+        GPIO_INTR_LOW_LEVEL};
+    gpio_set_intr_type((gpio_num_t)pinNumber, (gpio_int_type_t)mapint[intEdge]);
+
+    return true;
 }
 
 bool CPU_GPIO_EnableInputPin(
@@ -354,7 +409,6 @@ bool CPU_GPIO_EnableInputPin(
     GPIO_INT_EDGE intEdge,
     PinMode driveMode)
 {
-    esp_err_t ret;
     gpio_input_state *state;
 
     // Check Input drive mode
@@ -373,30 +427,24 @@ bool CPU_GPIO_EnableInputPin(
     // CPU_GPIO_EnableInputPin could be called a 2nd time with changed parameters
     if (pinISR != NULL && (state->isrPtr == NULL))
     {
-        ret = gpio_isr_handler_add((gpio_num_t)pinNumber, gpio_isr, (void *)state);
-        if (ret != ESP_OK)
+#ifdef API_nanoFramework_Runtime_ISR_Gpio
+        if (state->isrNativePtr == NULL)
         {
-            ESP_LOGE(TAG, "Add interrupt to gpio pin failed");
-            return false;
+            state->userEdge = intEdge;
+#endif
+            if (!EnableInterrupt(pinNumber, intEdge, state))
+            {
+                return false;
+            }
+#ifdef API_nanoFramework_Runtime_ISR_Gpio
         }
+#endif
 
         // setup debounce for pin
         // don't care about the return value
         CPU_GPIO_SetPinDebounce(pinNumber, debounceTimeMilliseconds);
 
-        // Map Interrupt edge to ESP32 edge
-        // NONE=0, EDGE_LOW=1, EDGE_HIGH=2, EDGE_BOTH=3, LEVEL_HIGH=4, LEVEL_LOW
-        uint8_t mapint[6] = {
-            GPIO_INTR_DISABLE,
-            GPIO_INTR_NEGEDGE,
-            GPIO_INTR_POSEDGE,
-            GPIO_INTR_ANYEDGE,
-            GPIO_INTR_HIGH_LEVEL,
-            GPIO_INTR_LOW_LEVEL};
-        gpio_set_intr_type((gpio_num_t)pinNumber, (gpio_int_type_t)mapint[intEdge]);
-
         // store parameters & configs
-        state->isrPtr = pinISR;
         state->mode = intEdge;
         state->param = (void *)isr_Param;
         state->debounceMs = debounceTimeMilliseconds;
@@ -421,14 +469,25 @@ bool CPU_GPIO_EnableInputPin(
             default:
                 break;
         }
+
+        // Set this last, in case state->isrNativePtr is assigned
+        // and an interrupt occurs while this method is executed.
+        state->isrPtr = pinISR;
     }
     else if (pinISR == NULL && (state->isrPtr != NULL))
     {
         // there is no managed handler setup anymore
         // remove INT handler
 
-        // remove callback
-        gpio_isr_handler_remove((gpio_num_t)state->pinNumber);
+#ifdef API_nanoFramework_Runtime_ISR_Gpio
+        if (state->isrNativePtr == NULL)
+        {
+#endif
+            // remove callback
+            gpio_isr_handler_remove((gpio_num_t)state->pinNumber);
+#ifdef API_nanoFramework_Runtime_ISR_Gpio
+        }
+#endif
 
         // clear parameters & configs
         state->isrPtr = NULL;
@@ -439,6 +498,59 @@ bool CPU_GPIO_EnableInputPin(
 
     return true;
 }
+
+#ifdef API_nanoFramework_Runtime_ISR_Gpio
+
+bool CPU_GPIO_SetNativeISR(
+    GPIO_PIN pinNumber,
+    GPIO_NATIVE_INTERRUPT_SERVICE_ROUTINE isr_Native,
+    GPIO_INT_EDGE intEdge,
+    void *isr_Param)
+{
+    gpio_input_state *state = GetInputState(pinNumber);
+    if (state == NULL)
+    {
+        return false;
+    }
+
+    if (isr_Native != NULL && (state->isrNativePtr == NULL))
+    {
+        if (state->isrPtr == NULL)
+        {
+            if (!EnableInterrupt(pinNumber, intEdge, state))
+            {
+                return false;
+            }
+        }
+        else if (intEdge != state->userEdge)
+        {
+            // User ISR and native ISR require different edges.
+            // This should not happen in vanilla nanoCLR, as the generic managed
+            // event and ISR interrupt generator use the same edge setting,
+            // and custom settings are only used for specific devices for which
+            // the ISR interrupt generator is not expected to be used.
+            ESP_LOGE(TAG, "GPIO incompatible edge");
+            return false;
+        }
+
+        state->paramNative = isr_Param;
+        state->isrNativePtr = isr_Native;
+    }
+    else if (isr_Native == NULL && (state->isrNativePtr != NULL))
+    {
+        if (state->isrPtr == NULL)
+        {
+            gpio_isr_handler_remove((gpio_num_t)state->pinNumber);
+        }
+
+        state->isrNativePtr = NULL;
+        state->paramNative = NULL;
+    }
+
+    return true;
+}
+
+#endif
 
 // Enable an output pin
 //

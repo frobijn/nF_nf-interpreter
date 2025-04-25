@@ -30,8 +30,8 @@
 // stack sizes are sufficient, etc.
 //----------------------------------------------------------------------
 
-//#define ENABLE_ISR_MEMORY_DIAGNOSTICS
-//#define ENABLE_ISR_TASK_DIAGNOSTICS
+#define ENABLE_ISR_MEMORY_DIAGNOSTICS
+#define ENABLE_ISR_TASK_DIAGNOSTICS
 
 #ifdef ENABLE_ISR_MEMORY_DIAGNOSTICS
 static void ISR_Diagnostics_Memory(const char *method, InterpreterMemoryType memoryType)

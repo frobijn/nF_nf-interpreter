@@ -41,7 +41,7 @@ option(API_nanoFramework.Runtime.ISR.I2C.Controller     "option for nanoFramewor
 option(API_nanoFramework.Runtime.ISR.I2C.Peripheral     "option for nanoFramework.Runtime.ISR.I2C.Peripheral API")
 option(API_nanoFramework.Runtime.ISR.Pwm                "option for nanoFramework.Runtime.ISR.Pwm API")
 option(API_nanoFramework.Runtime.ISR.Spi                "option for nanoFramework.Runtime.ISR.Spi API")
-option(API_nanoFramework.Runtime.ISR.Timer.Esp32        "option for nanoFramework.Runtime.ISR.Timer.Esp32 API")
+option(API_nanoFramework.Runtime.ISR.Timer              "option for nanoFramework.Runtime.ISR.Timer API")
 
 # Esp32 only
 option(API_Hardware.Esp32                               "option for Hardware.Esp32")
@@ -245,114 +245,114 @@ AddNativeAssemblyVersion("nanoFramework.Runtime.Native" "nanoFramework_Runtime_N
 # WHEN ADDING A NEW API add the corresponding block below 
 # required changes:
 # 1. change the 'IF' to match the CMake option 
-# 2. change the call to PerformSettingsForApiEntry() macro with the API name (doted naming)
+# 2. change the call to PerformSettingsForApiEntry() macro with the API name (dotted naming)
 ############################################################################################
 
 # Hardware.Esp32
 if(API_Hardware.Esp32)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32")
 endif()
 
 # nanoFramework.Hardware.Esp32.Rmt
 if(API_nanoFramework.Hardware.Esp32.Rmt)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Rmt")
 endif()
 
 # nanoFramework.Networking.Thread
 if(API_nanoFramework.Networking.Thread)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Networking.Thread")
 endif()
 
 # nanoFramework.Device.Bluetooth
 if(API_nanoFramework.Device.Bluetooth)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Device.Bluetooth")
 endif()
 
 # Hardware.Stm32
 if(API_Hardware.Stm32)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Stm32")
 endif()
 
 # nanoFramework.Device.Can
 if(API_nanoFramework.Device.Can)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Device.Can")
 endif()
 
 # nanoFramework.Graphics
 if(API_nanoFramework.Graphics)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Graphics")
 endif()
 
 # nanoFramework.Device.OneWire
 if(API_nanoFramework.Device.OneWire)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Device.OneWire")
 endif()
 
 # nanoFramework.Networking.Sntp
 if(API_nanoFramework.Networking.Sntp)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Networking.Sntp")
 endif()
 
 # nanoFramework.ResourceManager
 if(API_nanoFramework.ResourceManager)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.ResourceManager")
 endif()
 
 # nanoFramework.System.Collections
 if(API_nanoFramework.System.Collections)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.System.Collections")
 endif()
 
 # nanoFramework.System.Text
 if(API_nanoFramework.System.Text)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.System.Text")
 endif()
 
 # nanoFramework.TI.EasyLink
 if(API_nanoFramework.TI.EasyLink)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.TI.EasyLink")
 endif()
 
 # nanoFramework.Hardware.TI
 if(API_nanoFramework.Hardware.TI)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Hardware.TI")
 endif()
 
 # nanoFramework.Hardware.TI
 if(API_nanoFramework.GiantGecko.Adc)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.GiantGecko.Adc")
 endif()
 
 # nanoFramework.Hardware.GiantGecko
 if(API_Hardware.GiantGecko)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Hardware.GiantGecko")
 endif()
 
 # nanoFramework.System.IO.Hashing
 if(API_nanoFramework.System.IO.Hashing)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.System.IO.Hashing")
 endif()
 
 # nanoFramework.System.Security.Cryptography
 if(API_nanoFramework.System.Security.Cryptography)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.System.Security.Cryptography")
 
     # enable adding Mbed TLS to the build
@@ -361,7 +361,7 @@ endif()
 
 # nanoFramework.Runtime.Events
 if(API_nanoFramework.Runtime.Events)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Runtime.Events")
 
     # this one is special because it requires also another assembly for events that is internal (doens't have a managed end)
@@ -375,140 +375,140 @@ endif()
 
 # System.IO.FileSystem
 if(API_System.IO.FileSystem)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("System.IO.FileSystem")
 endif()
 
 # System.Math
 if(API_System.Math)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("System.Math")
 endif()
 
 # System.Net
 if(API_System.Net)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("System.Net")
 endif()
 
 # System.Device.Adc
 if(API_System.Device.Adc)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("System.Device.Adc")
 endif()
 
 # System.Device.Dac
 if(API_System.Device.Dac)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("System.Device.Dac")
 endif()
 
 # System.Device.Gpio
 if(API_System.Device.Gpio)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("System.Device.Gpio")
 endif()
 
 # System.Device.I2c
 if(API_System.Device.I2c)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("System.Device.I2c")
 endif()
 
 # System.Device.I2c.Slave
 if(API_System.Device.I2c.Slave)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("System.Device.I2c.Slave")
 endif()
 
 # System.Device.I2s
 if(API_System.Device.I2s)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("System.Device.I2s")
 endif()
 
 # System.Device.Pwm
 if(API_System.Device.Pwm)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("System.Device.Pwm")
 endif()
 
 # API_System.IO.Ports
 if(API_System.IO.Ports)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("System.IO.Ports")
 endif()
 
 # System.Device.Spi
 if(API_System.Device.Spi)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("System.Device.Spi")
 endif()
 
 # System.Runtime.Serialization
 if(API_System.Runtime.Serialization)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("System.Runtime.Serialization")
 endif()
 
 # System.Device.Wifi
 if(API_System.Device.Wifi)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("System.Device.Wifi")
 endif()
 
 # System.Device.UsbStream
 if(API_System.Device.UsbStream)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("System.Device.UsbStream")
 endif()
 
 # nanoFramework.Runtime.ISR.Core
 if(API_nanoFramework.Runtime.ISR.Core)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Runtime.ISR.Core")
 endif()
 
 # nanoFramework.Runtime.ISR.Adc
 if(API_nanoFramework.Runtime.ISR.Adc)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Runtime.ISR.Adc")
 endif()
 
 # nanoFramework.Runtime.ISR.Gpio
 if(API_nanoFramework.Runtime.ISR.Gpio)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Runtime.ISR.Gpio")
 endif()
 
 # nanoFramework.Runtime.ISR.I2C.Controller
 if(API_nanoFramework.Runtime.ISR.I2C.Controller)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Runtime.ISR.I2C.Controller")
 endif()
 
 # nanoFramework.Runtime.ISR.I2C.Peripheral
 if(API_nanoFramework.Runtime.ISR.I2C.Peripheral)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Runtime.ISR.I2C.Peripheral")
 endif()
 
 # nanoFramework.Runtime.ISR.Pwm
 if(API_nanoFramework.Runtime.ISR.Pwm)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Runtime.ISR.Pwm")
 endif()
 
 # nanoFramework.Runtime.ISR.Spi
 if(API_nanoFramework.Runtime.ISR.Spi)
-    ##### API name here (doted name)
+    ##### API name here (dotted name)
     PerformSettingsForApiEntry("nanoFramework.Runtime.ISR.Spi")
 endif()
 
-# nanoFramework.Runtime.ISR.Timer.Esp32
-if(API_nanoFramework.Runtime.ISR.Timer.Esp32)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("nanoFramework.Runtime.ISR.Timer.Esp32")
+# nanoFramework.Runtime.ISR.Timer
+if(API_nanoFramework.Runtime.ISR.Timer)
+    ##### API name here (dotted name)
+    PerformSettingsForApiEntry("nanoFramework.Runtime.ISR.Timer")
 endif()
 
 # Interop assemblies

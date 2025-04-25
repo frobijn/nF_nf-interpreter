@@ -8,6 +8,7 @@
 #define DRIVERS_GPIO_DECL_H
 
 #include <nanoPackStruct.h>
+#include "CLR_IncludedAPI.h"
 
 #define GPIO_PIN_NONE 0xFFFFFFFF
 
@@ -69,7 +70,7 @@ void CPU_GPIO_DisablePin(GPIO_PIN Pin, PinMode driveMode, uint32_t alternateFunc
 // Pin
 //   The number of the input pin to be enabled.
 // InitialState
-//   Inial value of pin
+//   Initial value of pin
 // PinMode
 //   Pin resistor driver mode
 //
@@ -85,11 +86,11 @@ bool CPU_GPIO_EnableOutputPin(GPIO_PIN Pin, GpioPinValue InitialState, PinMode d
 //
 // pinNumber
 //   The number of the input pin to be enabled.
-// Debounce milisecs
+// Debounce millisecs
 //   A value you can set to greater than 0 to enable glitch filtering (debouncing) for the number of millissecs
 // pin_ISR
 //   A pointer to a function that is called when an interrupt is generated.
-// PIN_isr_Param
+// isr_Param
 //   A programmer-defined parameter that is passed to the assigned interrupt service routine (ISR).
 // intEdge
 //   A value that indicates the transition edge or state on which the interrupt is called.
@@ -105,6 +106,40 @@ bool CPU_GPIO_EnableInputPin(
     void *isr_Param,
     GPIO_INT_EDGE intEdge,
     PinMode driveMode);
+
+#ifdef API_nanoFramework_Runtime_ISR_Gpio
+
+//
+//  CPU_GPIO_SetNativeISR
+//
+//  Ensure interrupt generation is enabled/disabled regardless of
+//  the presense of an interrupt handler in previous calls to CPU_GPIO_EnableInputPin.
+//  The pin must have been configured as input via a previous CPU_GPIO_EnableInputPin call.
+//  Both CPU_GPIO_EnableInputPin and CPU_GPIO_SetNativeISR can specify an interrupt handler.
+//
+// Parameters :-
+//
+// pinNumber
+//   The number of the input pin to be enabled.
+// isr_Native
+//   A pointer to a function that is called when an interrupt is generated.
+// isr_Param
+//   A programmer-defined parameter that is passed to the assigned interrupt service routine (ISR).
+// intEdge
+//   A value that indicates the transition edge or state on which the interrupt is called.
+// Return Value
+//   true if the specified pin was successfully enabled; otherwise, false.
+//
+
+typedef void (*GPIO_NATIVE_INTERRUPT_SERVICE_ROUTINE)(void *pArg, GpioPinValue pinValue);
+
+bool CPU_GPIO_SetNativeISR(
+    GPIO_PIN pinNumber,
+    GPIO_NATIVE_INTERRUPT_SERVICE_ROUTINE isr_Native,
+    GPIO_INT_EDGE intEdge,
+    void *isr_Param);
+
+#endif
 
 //  Return current gpio pin state
 GpioPinValue CPU_GPIO_GetPinState(GPIO_PIN Pin);
