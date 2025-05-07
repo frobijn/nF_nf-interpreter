@@ -59,8 +59,8 @@ NF_Runtime_ISR_HeapOffsetType NF_RunTime_ISR_DataBuffer_ElementSize(CLR_UINT8 *d
 
 NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_DataBuffer_Count(CLR_UINT8 *dataBuffer)
 {
-    return *(NF_Runtime_ISR_SharedDataOffsetType
-                 *)(dataBuffer + sizeof(NF_Runtime_ISR_SharedDataOffsetType) + sizeof(NF_Runtime_ISR_HeapOffsetType));
+    return *(NF_Runtime_ISR_SharedDataOffsetType *)(dataBuffer + sizeof(NF_Runtime_ISR_SharedDataOffsetType) +
+                                                    sizeof(NF_Runtime_ISR_HeapOffsetType));
 }
 
 void NF_RunTime_ISR_DataBuffer_Add(CLR_UINT8 *dataBuffer, CLR_UINT8 *data)
@@ -120,8 +120,8 @@ void NF_RunTime_ISR_DataBuffer_Get(CLR_UINT8 *dataBuffer, NF_Runtime_ISR_SharedD
 
 void NF_RunTime_ISR_DataBuffer_Clear(CLR_UINT8 *dataBuffer)
 {
-    *(NF_Runtime_ISR_SharedDataOffsetType
-          *)(dataBuffer + sizeof(NF_Runtime_ISR_SharedDataOffsetType) + sizeof(NF_Runtime_ISR_HeapOffsetType)) = 0;
+    *(NF_Runtime_ISR_SharedDataOffsetType *)(dataBuffer + sizeof(NF_Runtime_ISR_SharedDataOffsetType) +
+                                             sizeof(NF_Runtime_ISR_HeapOffsetType)) = 0;
 }
 #pragma endregion
 
@@ -322,7 +322,7 @@ void NF_RunTime_ISR_HandleInterrupt(
 {
     if (interruptHandler->OnInterruptSetArgumentsOffset != 0 || interruptHandler->OnInterruptOffset != 0)
     {
-        NF_Runtime_ISR_ServiceRoutine serviceRoutine;
+        NF_Runtime_ISR_ServiceRoutine serviceRoutine{};
         serviceRoutine.CalledFromTask = false;
         serviceRoutine.EventArg = eventArg;
         serviceRoutine.InterruptHandler = interruptHandler;
