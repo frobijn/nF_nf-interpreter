@@ -404,9 +404,16 @@ void NF_RunTime_ISR_RunServiceRoutine(NF_Runtime_ISR_ManagedActivation *serviceR
     ServiceRoutineMemory memory{};
     memory.OnInterruptMemory = serviceRoutine->OnInterruptMemory;
     memory.AfterInterruptMemory = serviceRoutine->AfterInterruptMemory;
-    memory.ManagedActivationMemory = serviceRoutine->ServiceRoutineMemory;
-    memory.Heap =
-        memory.ManagedActivationMemory + *(NF_Runtime_ISR_SharedDataOffsetType *)memory.ManagedActivationMemory;
+    if (serviceRoutine->ServiceRoutineMemory != nullptr)
+    {
+        memory.ManagedActivationMemory = serviceRoutine->ServiceRoutineMemory;
+        NF_Runtime_ISR_SharedDataOffsetType heapOffset =
+            *(NF_Runtime_ISR_SharedDataOffsetType *)memory.ManagedActivationMemory;
+        if (heapOffset != 0)
+        {
+            memory.Heap = memory.ManagedActivationMemory + heapOffset;
+        }
+    }
 
     CLR_UINT8 *bytecodePtr;
     switch (serviceRoutine->ServiceRoutineOffset & NF_RUNTIME_ISR_MEMORY_OFFSET_BITS)
@@ -447,11 +454,28 @@ bool NF_RunTime_ISR_RunServiceRoutine(NF_Runtime_ISR_ServiceRoutine *serviceRout
 
     if (serviceRoutine->CalledFromTask)
     {
-        memory.Heap = memory.AfterInterruptMemory + *(NF_Runtime_ISR_SharedDataOffsetType *)memory.AfterInterruptMemory;
+        if (memory.AfterInterruptMemory != nullptr)
+        {
+            NF_Runtime_ISR_SharedDataOffsetType heapOffset =
+                *(NF_Runtime_ISR_SharedDataOffsetType *)memory.AfterInterruptMemory;
+            if (heapOffset != 0)
+            {
+
+                memory.Heap = memory.AfterInterruptMemory + heapOffset;
+            }
+        }
     }
     else
     {
-        memory.Heap = memory.OnInterruptMemory + *(NF_Runtime_ISR_SharedDataOffsetType *)memory.OnInterruptMemory;
+        if (memory.OnInterruptMemory != nullptr)
+        {
+            NF_Runtime_ISR_SharedDataOffsetType heapOffset =
+                *(NF_Runtime_ISR_SharedDataOffsetType *)memory.OnInterruptMemory;
+            if (heapOffset != 0)
+            {
+                memory.Heap = memory.OnInterruptMemory + heapOffset;
+            }
+        }
     }
 
     CLR_UINT8 *bytecodePtr;
