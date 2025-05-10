@@ -13,7 +13,7 @@
 //
 //----------------------------------------------------------------------
 #define MEMORY_ALLOCATION                MALLOC_CAP_8BIT
-#define TASK_STACK_SIZE                  20240
+#define TASK_STACK_SIZE                  4096
 #define TASK_AFTER_INTERRUPT_PRIORITY    13
 #define TASK_MANAGED_ACTIVATION_PRIORITY 10
 #define TASK_QUEUE_TIMEOUT               10
