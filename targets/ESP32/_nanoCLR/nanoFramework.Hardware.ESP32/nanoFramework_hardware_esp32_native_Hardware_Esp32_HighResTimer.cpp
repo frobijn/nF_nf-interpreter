@@ -17,6 +17,7 @@
 typedef struct __nfpack EspTimer
 {
     esp_timer_handle_t Timer;
+    bool ForISR;
     NF_Runtime_ISR_InterruptHandler *InterruptHandler;
 } EspTimer;
 
@@ -38,6 +39,7 @@ static int FindNextTimerIndex()
         if (ESP32_TIMER_HANDLE(index) == 0)
         {
 #ifdef API_nanoFramework_Runtime_ISR_Timer
+            hrtimers[index].ForISR = false;
             hrtimers[index].InterruptHandler = nullptr;
 #endif
             return index;
@@ -53,6 +55,10 @@ static void HRtimer_callback(void *arg)
     if (hrtimers[(int)arg].InterruptHandler != nullptr)
     {
         NF_RunTime_ISR_HandleInterrupt(hrtimers[(int)arg].InterruptHandler, 0);
+        return;
+    }
+    else if (hrtimers[(int)arg].ForISR)
+    {
         return;
     }
 #endif
@@ -71,7 +77,21 @@ void NF_RunTime_ISR_InitialiseHighResTimer(
     {
         if (ESP32_TIMER_HANDLE(index) == handle)
         {
+            hrtimers[index].ForISR = true;
             hrtimers[index].InterruptHandler = interruptHandlerData;
+            break;
+        }
+    }
+}
+
+void NF_RunTime_ISR_DisableHighResTimer(CLR_RT_HeapBlock *timer)
+{
+    esp_timer_handle_t handle = NF_RunTime_ISR_GetTimerHandle(timer);
+    for (int index = 0; index < MAX_HRTIMERS; index++)
+    {
+        if (ESP32_TIMER_HANDLE(index) == handle)
+        {
+            hrtimers[index].InterruptHandler = nullptr;
             break;
         }
     }

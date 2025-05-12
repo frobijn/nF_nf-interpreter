@@ -225,11 +225,6 @@ void NF_RunTime_ISR_EnableRTOSTask(void *taskData, NF_Runtime_ISR_HeapOffsetType
 void NF_RunTime_ISR_DisableRTOSTask(void *taskData)
 {
     RTOSTaskData *data = (RTOSTaskData *)taskData;
-    if (data->Queue)
-    {
-        xQueueReset(data->Queue);
-    }
-
     if (data->Task)
     {
         vTaskSuspend(data->Task);

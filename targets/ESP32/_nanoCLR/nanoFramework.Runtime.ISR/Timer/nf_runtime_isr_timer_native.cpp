@@ -24,7 +24,7 @@ HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBas
 }
 
 HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::
-    EnableInterruptGenerator___VOID__I4__nanoFrameworkRuntimeISROnInterruptHandlers(CLR_RT_StackFrame &stack)
+    EnableNativeInterruptGenerator___VOID__I4__nanoFrameworkRuntimeISROnInterruptHandlers(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -39,6 +39,21 @@ HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBas
             pThis[Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::FIELD___timer]
                 .Dereference(),
             interruptData);
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::
+    DisableNativeInterruptGenerator___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
+
+        NF_RunTime_ISR_DisableHighResTimer(
+            pThis[Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::FIELD___timer]
+                .Dereference());
     }
     NANOCLR_NOCLEANUP();
 }
@@ -73,7 +88,12 @@ static void DataBusSetPeriod(
     esp_timer_handle_t timer = ((TimerAsDataBusData *)dataBus)->Timer;
 
     esp_timer_stop(timer);
-    esp_timer_start_periodic(timer, *(CLR_UINT64 *)dataPtr);
+
+    CLR_UINT64 period = *(CLR_UINT64 *)dataPtr;
+    if (period != 0)
+    {
+        esp_timer_start_periodic(timer, period);
+    }
 }
 
 static void DataBusSetOneShot(
@@ -85,7 +105,12 @@ static void DataBusSetOneShot(
     esp_timer_handle_t timer = ((TimerAsDataBusData *)dataBus)->Timer;
 
     esp_timer_stop(timer);
-    esp_timer_start_once(timer, *(CLR_UINT64 *)dataPtr);
+
+    CLR_UINT64 timeOut = *(CLR_UINT64 *)dataPtr;
+    if (timeOut != 0)
+    {
+        esp_timer_start_once(timer, timeOut);
+    }
 }
 
 HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::GetDataBusMemorySize___U4(

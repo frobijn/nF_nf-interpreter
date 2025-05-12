@@ -17,7 +17,8 @@ struct Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase
     static const int FIELD___initialInterval = 3;
 
     NANOCLR_NATIVE_DECLARE(GetInterruptGeneratorMemorySize___U4);
-    NANOCLR_NATIVE_DECLARE(EnableInterruptGenerator___VOID__I4__nanoFrameworkRuntimeISROnInterruptHandlers);
+    NANOCLR_NATIVE_DECLARE(EnableNativeInterruptGenerator___VOID__I4__nanoFrameworkRuntimeISROnInterruptHandlers);
+    NANOCLR_NATIVE_DECLARE(DisableNativeInterruptGenerator___VOID);
     NANOCLR_NATIVE_DECLARE(GetDataBusMemorySize___U4);
     NANOCLR_NATIVE_DECLARE(InitialiseDataBus___VOID__I4);
 
