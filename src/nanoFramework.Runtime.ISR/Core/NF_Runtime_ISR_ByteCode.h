@@ -19,10 +19,8 @@ namespace nanoFramework.Runtime.ISR.Compilation
 {
 #endif
 
-// The data used by service routine is stored in three places:
+// The data used by service routine is stored in four places:
 //
-// - A heap (one per service routine) for local variables defined in the service routine
-//   and for intermediate results during the evaluation of expressions.
 // - Shared ISR memory (optionally) for the class data fields, pointers to data bus implementations
 //   and buffers that are accessed by at least one service routine that is called in
 //   direct response to an interrupt.
@@ -32,35 +30,34 @@ namespace nanoFramework.Runtime.ISR.Compilation
 // - Memory (optionally) for the class data fields, pointers to data bus implementations
 //   and buffers that are accessed by a service routine that is called from managed code
 //   instead of from an interrupt.
+// - A heap (if necessary: one for ISR, one for RTOS task, one for managed activated task)
+//   for local variables defined in the service routine and for intermediate results during
+//   the evaluation of expressions.
 //
 // For arrays the index of the element to use may not be known at compile time. Instead an indirect
 // reference is used: a location in the heap is used to compute the address of the element.
 //
 // As an optimization of the compiled byte code and size of the native interpreter the four
-// types of memory selection share a unified addressing scheme. If an opcode as a data location as argument:
+// types of memory selection share a unified addressing scheme.
+// If an opcode as a data location as argument:
 //
-// - If the first byte has a MSB of 1 (see NF_RUNTIME_ISR_MEMORY_HEAP_FLAG), the address
-//   is an offset in the heap memory. The address consists of 2 bytes (14 bits excluding the two MSB).
+// - The unified memory address is a 4-byte integer (little endian).
+//      - The three MSB bits determine the location of the memory.
+//      - The other 29 bits are an offset to the memory location w.r.t. the start of the memory.
 //
-//      - If the one-less-than-MSB is 0, the 14-bit index points to the location the heap that should be used
-//        to evaluate the opcode.
-//      - If the one-less-than-MSB is 1, the 14-bit index points to the location the heap where a 2- or 4-byte
-//        data location is stored. The memory to use in the evaluation of the opcode is the memory pointed to
-//        by that data location.
+// - If the MSB bit (0x80 00 00 00) is set, the address is an indirect reference. The address
+//     points to a memory location that holds a unified memory address (with MSB bit = 0) that
+//     should be used as the actual address of the memory location.
+//     - If the address is pointing to the heap, the next two MSB bits of the actual address
+//       are used.
+//     - If the address is pointing to shared data, the actual address is the offset into
+//       the same shared data memory.
 //
-// - If the first byte has a MSB of 0, the address is an offset in shared memory.
-//   The address consists of 4 bytes (28 bits excluding the three MSB bits).
-//
-//      - If the first byte has a one-less-than-MSB of 1, the 28-bit address points to a location
-//        where a 4-byte offset in the same shared memory is stored.  The memory to use in the evaluation
-//        of the opcode is the memory pointed to by that offset.
-//      - If the first byte has a two-and-three-less-than-MSB of 01, the 28-bit address
-//        is an offset in the shared ISR memory.
-//      - If the first byte has a two-and-three-less-than-MSB of 10, the 28-bit address
-//        is an offset in the shared RTOS task memory.
-//      - If the first byte has a two-and-three-less-than-MSB of 11, the 28-bit address
-//        is an offset in the memory for the service routine activated from managed code.
-//
+// - The next two MSB bits indicate which memory the address points to:
+//     - 00 = heap
+//     - 01 = shared ISR memory
+//     - 02 = shared RTOS task memory
+//     - 03 = shared managed activation task memory
 
 #if NF_RUNTIME_ISR_TOOLING
 /// <summary>
@@ -69,74 +66,50 @@ namespace nanoFramework.Runtime.ISR.Compilation
 public
 static class NativeImplementationConstants
 {
-    /// <summary>
-    /// Type to use to specify an offset of data in the shared memory.
-    /// </summary>
-  public
-    const CompiledDataType SharedDataOffsetType = CompiledDataType.UInt32;
+  /// <summary>
+  /// Type to use to specify an offset of data in the heap and shared memory.
+  /// </summary>
+  public const CompiledDataType MemoryOffsetType = CompiledDataType.UInt32;
 
-    /// <summary>
-    /// Type to use to specify an offset of data in the heap of a routine.
-    /// </summary>
-  public
-    const CompiledDataType HeapOffsetType = CompiledDataType.UInt16;
+  /// <summary>
+  /// Maximum size of the heap and of a shared data memory block.
+  /// </summary>
+  public const int MaximumMemoryBlockSize = 0x20_00_00_00;
 
-    /// <summary>
-    /// Maximum size of a shared data memory block.
-    /// </summary>
-  public
-    const int MaximumSharedDataSize = 0x10000000;
+  /// <summary>
+  /// Flag to add to a memory offset to indicate it is an indirect reference:
+  /// the data at the memory location contains the actual data location.
+  /// </summary>
+  public const uint UMAIndirectReferenceFlag = 0x80_00_00_00;
 
-    /// <summary>
-    /// Maximum size of the heap of a service routine.
-    /// </summary>
-  public
-    const int MaximumHeapSize = 0x4000;
+  /// <summary>
+  /// Bits in an unified memory address that show where the data is located.
+  /// </summary>
+  public const uint UMAMemoryTypeMask = 0x60_00_00_00;
 
-    /// <summary>
-    /// Flag to add to an offset in the heap to get its unified memory address.
-    /// </summary>
-  public
-    const int HeapOffsetFlag = 0x8000;
+  /// <summary>
+  /// Flag to add to an offset in the heap to get its unified memory address.
+  /// </summary>
+  public const uint UMAInHeapFlag = 0x00_00_00_00;
 
-    /// <summary>
-    /// Flag to add to an offset in the heap to indicate it is an indirect reference:
-    /// the data at the heap location contains the actual data location.
-    /// </summary>
+  /// <summary>
+  /// Flag to add to an offset in the shared data accessible from an ISR to get its unified memory address.
+  /// </summary>
   public
-    const int HeapOffsetIndirectReferenceFlag = 0x4000;
-
-    /// <summary>
-    /// Bits in an unified memory address that show where the data is located.
-    /// </summary>
-  public
-    const int SharedDataOffsetBits = 0x30000000;
-
-    /// <summary>
-    /// Flag to add to an offset in the shared data accessible from an ISR to get its unified memory address.
-    /// </summary>
-  public
-    const int SharedISRDataOffsetFlag = 0x10000000;
+    const uint UMAInSharedISRDataFlag = 0x20_00_00_00;
 
     /// <summary>
     /// Flag to add to an offset in the shared data accessible from a RTOS task to get its unified memory address.
     /// </summary>
   public
-    const int SharedTaskDataOffsetFlag = 0x20000000;
+    const uint UMAInSharedTaskDataFlag = 0x40_00_00_00;
 
     /// <summary>
     /// Flag to add to an offset in the data accessible from a service routine activated from managed code to get its
     /// unified memory address.
     /// </summary>
   public
-    const int ManagedActivationDataOffsetFlag = 0x30000000;
-
-    /// <summary>
-    /// Flag to add to an offset in the shared data to indicate it is an indirect reference:
-    /// the data at the shared reference location contains the actual data location.
-    /// </summary>
-  public
-    const int SharedDataOffsetIndirectReferenceFlag = 0x40000000;
+    const uint UMAInManagedActivationDataFlag = 0x60_00_00_00;
 
     /// <summary>
     /// Type to use to specify a near offset within the compiled byte code of a service routine.
@@ -151,40 +124,23 @@ static class NativeImplementationConstants
     const CompiledDataType ServiceParameterType = CompiledDataType.UInt32;
 }
 #else
-typedef CLR_UINT32 NF_Runtime_ISR_SharedDataOffsetType;
-typedef CLR_UINT16 NF_Runtime_ISR_HeapOffsetType;
+typedef CLR_UINT32 NF_Runtime_ISR_MemoryOffsetType;
 typedef CLR_INT32 NF_Runtime_ISR_ByteCodeOffsetType;
 typedef CLR_UINT32 NF_Runtime_ISR_ServiceParameterType;
 
 constexpr NF_Runtime_ISR_ServiceParameterType NF_Runtime_ISR_ServiceParameterTypeSize =
     sizeof(NF_Runtime_ISR_ServiceParameterType);
-constexpr CLR_UINT8 NF_RUNTIME_ISR_MEMORY_HEAP_FLAG = 0x80;
-constexpr CLR_UINT8 NF_RUNTIME_ISR_MEMORY_HEAP_MASK = (CLR_UINT8)~NF_RUNTIME_ISR_MEMORY_HEAP_FLAG;
-constexpr CLR_UINT8 NF_RUNTIME_ISR_INDIRECT_REFERENCE_FLAG = 0x40;
-constexpr CLR_UINT8 NF_RUNTIME_ISR_MEMORY_BITS = 0x30;
-constexpr CLR_UINT8 NF_RUNTIME_ISR_MEMORY_ISR_FLAG = 0x10;
-constexpr CLR_UINT8 NF_RUNTIME_ISR_MEMORY_TASK_FLAG = 0x20;
-constexpr CLR_UINT8 NF_RUNTIME_ISR_MEMORY_ACTIVATION_FLAG = 0x30;
-constexpr CLR_UINT8 NF_RUNTIME_ISR_MEMORY_MASK = ~(CLR_UINT8)0x30;
-constexpr NF_Runtime_ISR_HeapOffsetType NF_RUNTIME_ISR_MEMORY_HEAP_INDIRECT_REFERENCE_FLAG =
-    (((NF_Runtime_ISR_HeapOffsetType)NF_RUNTIME_ISR_INDIRECT_REFERENCE_FLAG) << 8);
-constexpr NF_Runtime_ISR_HeapOffsetType NF_RUNTIME_ISR_MEMORY_HEAP_INDIRECT_REFERENCE_MASK =
-    ~NF_RUNTIME_ISR_MEMORY_HEAP_INDIRECT_REFERENCE_FLAG;
-constexpr NF_Runtime_ISR_SharedDataOffsetType NF_RUNTIME_ISR_MEMORY_OFFSET_BITS =
-    ((NF_Runtime_ISR_SharedDataOffsetType)(NF_RUNTIME_ISR_MEMORY_BITS)) << 24;
-constexpr NF_Runtime_ISR_SharedDataOffsetType NF_RUNTIME_ISR_MEMORY_OFFSET_ISR_FLAG =
-    ((NF_Runtime_ISR_SharedDataOffsetType)(NF_RUNTIME_ISR_MEMORY_ISR_FLAG)) << 24;
-constexpr NF_Runtime_ISR_SharedDataOffsetType NF_RUNTIME_ISR_MEMORY_OFFSET_TASK_FLAG =
-    ((NF_Runtime_ISR_SharedDataOffsetType)(NF_RUNTIME_ISR_MEMORY_TASK_FLAG)) << 24;
-constexpr NF_Runtime_ISR_SharedDataOffsetType NF_RUNTIME_ISR_MEMORY_OFFSET_ACTIVATION_FLAG =
-    ((NF_Runtime_ISR_SharedDataOffsetType)(NF_RUNTIME_ISR_MEMORY_ACTIVATION_FLAG)) << 24;
-constexpr NF_Runtime_ISR_SharedDataOffsetType NF_RUNTIME_ISR_MEMORY_OFFSET_MASK = ~NF_RUNTIME_ISR_MEMORY_OFFSET_BITS;
-constexpr NF_Runtime_ISR_SharedDataOffsetType NF_RUNTIME_ISR_MEMORY_SHAREDDATA_INDIRECT_REFERENCE_FLAG =
-    (((NF_Runtime_ISR_SharedDataOffsetType)NF_RUNTIME_ISR_INDIRECT_REFERENCE_FLAG) << 24);
-constexpr NF_Runtime_ISR_SharedDataOffsetType NF_RUNTIME_ISR_MEMORY_SHAREDDATA_INDIRECT_REFERENCE_MASK =
-    ~NF_RUNTIME_ISR_MEMORY_SHAREDDATA_INDIRECT_REFERENCE_FLAG;
 
-constexpr NF_Runtime_ISR_SharedDataOffsetType NF_RUNTIME_ISR_MAXIMUMSHAREDDATASIZE = 0x10000000;
+typedef CLR_UINT32 NF_Runtime_ISR_UMA_Type;
+constexpr CLR_UINT32 NF_RUNTIME_ISR_UMA_INDIRECT_REFERENCE_FLAG = 0x80000000;
+constexpr CLR_UINT32 NF_RUNTIME_ISR_UMA_MEMORYTYPE_MASK = 0x60000000;
+constexpr CLR_UINT32 NF_RUNTIME_ISR_UMA_OFFSET_MASK = ~(NF_RUNTIME_ISR_UMA_INDIRECT_REFERENCE_FLAG | NF_RUNTIME_ISR_UMA_MEMORYTYPE_MASK);
+constexpr CLR_UINT32 NF_RUNTIME_ISR_UMA_MEMORYTYPE_HEAP = 0x00000000;
+constexpr CLR_UINT32 NF_RUNTIME_ISR_UMA_MEMORYTYPE_ISR = 0x20000000;
+constexpr CLR_UINT32 NF_RUNTIME_ISR_UMA_MEMORYTYPE_RTOSTASK = 0x40000000;
+constexpr CLR_UINT32 NF_RUNTIME_ISR_UMA_MEMORYTYPE_MANAGEDACTIVATION = 0x60000000;
+
+constexpr NF_Runtime_ISR_MemoryOffsetType NF_RUNTIME_ISR_MAXIMUMSHAREDDATASIZE = 0x20000000;
 #endif
 
 #if NF_RUNTIME_ISR_TOOLING
@@ -243,29 +199,29 @@ enum class NF_Runtime_ISR_CompiledOpCode : CLR_UINT8
     /// Abort: stop executing this service routine and do not continue with other service routines
     /// (if multiple are specified).
     /// </summary>
-    Abort = 5,
+    Abort = 2,
     /// <summary>
     /// Return or abort: stop executing this service routine. First argument is the offset in unified memory
     /// to a boolean that decides whether (true) or not (false) to continue with other service routines
     /// (if multiple are specified).
     /// </summary>
-    ReturnOrAbort = 6,
+    ReturnOrAbort = 3,
     /// <summary>
     /// Continue with the opcode at relative offset that is specified by a NF_Runtime_ISR_ByteCodeOffsetType.
     /// </summary>
-    GoTo = 2,
+    GoTo = 4,
     /// <summary>
     /// Continue with the opcode at relative offset that is specified by a NF_Runtime_ISR_ByteCodeOffsetType
     /// (first argument) if the condition is met. The second argument is the offset in unified memory where the
     /// boolean value of the condition is stored.
     /// </summary>
-    OnConditionGoTo = 3,
+    OnConditionGoTo = 5,
     /// <summary>
     /// Continue with the opcode at relative offset that is specified by a NF_Runtime_ISR_ByteCodeOffsetType
     /// (first argument) if the condition is not met. The second argument is the offset in unified memory where the
     /// boolean value of the condition is stored.
     /// </summary>
-    OnNotConditionGoTo = 4,
+    OnNotConditionGoTo = 6,
 
     /// <summary>
     /// Raise an event that is handled by managed code. Argument is the offset in unified memory where the
@@ -283,13 +239,13 @@ enum class NF_Runtime_ISR_CompiledOpCode : CLR_UINT8
     StoreLiteral = 10,
     /// <summary>
     /// Fill the data in the data location with zeros. First argument is the offset in unified memory where the
-    /// data should be stored, second is a HeapOffsetType with the number of bytes to assign zero to.
+    /// data should be stored, second is a MemoryOffsetType with the number of bytes to assign zero to.
     /// </summary>
     StoreZero = 11,
     /// <summary>
     /// Copy data from one data location to another. First argument is the offset in unified memory where the
     /// data should be stored, second is the offset in unified memory where the data should be read from,
-    /// third is a HeapOffsetType with the number of bytes to copy.
+    /// third is a MemoryOffsetType with the number of bytes to copy.
     /// </summary>
     CopyData = 12,
     /// <summary>
@@ -303,21 +259,13 @@ enum class NF_Runtime_ISR_CompiledOpCode : CLR_UINT8
     /// Copy the data to the heap that is passed as parameter to the service routine. First argument is a byte that
     /// is the number of bytes to copy.
     /// </summary>
-    CopyParameter = 16,
+    CopyParameter = 14,
     /// <summary>
-    /// Update a reference to heap memory by adding an offset to it. First argument is the offset in the heap
-    /// (as unified memory) where the reference resides, second is the offset in unified memory where the
-    /// number of elements should be read from, and third is the element size. The number and size of elements
-    /// are specified as the same type as the referenced stored in the heap: as heap offset type.
+    /// Update a reference to heap or shared data memory by adding an offset to it. First argument is the offset in the memory
+    /// (as unified memory address) where the reference resides, second is the offset in unified memory where the
+    /// number of elements should be read from, and third is the element size.
     /// </summary>
-    UpdateHeapOffset = 14,
-    /// <summary>
-    /// Update a reference to heap memory by adding an offset to it. First argument is the offset in the heap
-    /// (as unified memory) where the reference resides, second is the offset in unified memory where the
-    /// number of elements should be read from, and third is the element size. The number and size of elements
-    /// are specified as the same type as the referenced stored in the heap: as shared data offset type.
-    /// </summary>
-    UpdateSharedDataOffset = 15,
+    UpdateMemoryOffset = 15,
 
     // --------------------------------------------------------------------------------
     // Integer (and boolean) operations
@@ -950,13 +898,13 @@ enum class NF_Runtime_ISR_CompiledOpCode : CLR_UINT8
     DataBufferAdd = DataBufferGetCount + 1,
     /// <summary>
     /// Add data to the data buffer at a specific location. First argument is the offset in unified memory
-    /// to the (native) data allocated for the data buffer.  Second is a SharedDataOffsetType with the position to
+    /// to the (native) data allocated for the data buffer.  Second is a MemoryOffsetType with the position to
     /// insert the data in. Third argument is the offset in unified memory to the data to be added to the buffer.
     /// </summary>
     DataBufferInsert = DataBufferAdd + 1,
     /// <summary>
     /// Get data from the data buffer at a specific location. First argument is the offset in unified memory
-    /// to the (native) data allocated for the data buffer. Second is a SharedDataOffsetType with the position to get
+    /// to the (native) data allocated for the data buffer. Second is a MemoryOffsetType with the position to get
     /// the data from. Third argument is the offset in unified memory to the place the data should be stored in.
     /// </summary>
     DataBufferGet = DataBufferInsert + 1,
@@ -1033,21 +981,21 @@ enum class NF_Runtime_ISR_CompiledOpCode : CLR_UINT8
     /// <summary>
     /// Call the Read method of a data bus. First argument is the offset in unified memory to the (native) data
     /// allocated for the data bus. Second argument is the offset in unified memory to the place the data should be
-    /// stored that is read via the data bus. Third argument is a HeapOffsetType with the number of bytes to read.
+    /// stored that is read via the data bus. Third argument is a MemoryOffsetType with the number of bytes to read.
     /// </summary>
     DataBusRead = 250,
     /// <summary>
     /// Call the Write method of a data bus. First argument is the offset in unified memory to the (native) data
     /// allocated for the data bus. Second argument is the offset in unified memory to the data that should be written
-    /// to the data bus. Third argument is a HeapOffsetType with the number of bytes to write.
+    /// to the data bus. Third argument is a MemoryOffsetType with the number of bytes to write.
     /// </summary>
     DataBusWrite = 251,
     /// <summary>
     /// Call the WriteRead method of a data bus. First argument is the offset in unified memory to the (native) data
     /// allocated for the data bus. Second argument is the offset in unified memory to the data that should be written
-    /// to the data bus. Third argument is a HeapOffsetType with the number of bytes to write. Fourth argument is the
+    /// to the data bus. Third argument is a MemoryOffsetType with the number of bytes to write. Fourth argument is the
     /// offset in unified memory to the place the data should be stored that is read via the data bus. Fifth argument
-    /// is a HeapOffsetType with the number of bytes to read.
+    /// is a MemoryOffsetType with the number of bytes to read.
     /// </summary>
     DataBusWriteRead = 252,
     /// <summary>

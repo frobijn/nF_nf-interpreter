@@ -59,16 +59,16 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DoEnableRTOSTask___VOID,
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DisableRTOSTask___VOID,
-    Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_GetMemorySize___U4__U4__U2,
-    Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Initialize___VOID__I4__U4__U2,
+    Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_GetMemorySize___U4__U4__U4,
+    Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Initialize___VOID__I4__U4__U4,
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Capacity___U4__I4,
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Count___U4__I4,
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Add___VOID__I4__SZARRAY_U1,
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Insert___VOID__I4__U4__SZARRAY_U1,
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Get___VOID__I4__U4__SZARRAY_U1,
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataBuffer_Clear___VOID__I4,
-    Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataRingBuffer_GetMemorySize___U4__U4__U2,
-    Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataRingBuffer_Initialize___VOID__I4__U4__U2,
+    Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataRingBuffer_GetMemorySize___U4__U4__U4,
+    Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataRingBuffer_Initialize___VOID__I4__U4__U4,
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataRingBuffer_Capacity___U4__I4,
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataRingBuffer_IsEmpty___BOOLEAN__I4,
     Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::DataRingBuffer_Push___BOOLEAN__I4__SZARRAY_U1__BOOLEAN,
@@ -109,7 +109,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_ISR_Core =
 {
     "nanoFramework.Runtime.ISR.Core",
-    0xBDD607B4,
+    0x9E0B8CD5,
     method_lookup,
     { 1, 0, 0, 0 }
 };

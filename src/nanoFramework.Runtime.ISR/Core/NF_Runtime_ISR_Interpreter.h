@@ -47,7 +47,7 @@ typedef struct __nfpack NF_Runtime_ISR_DataBus
     void (*Read)(
         struct NF_Runtime_ISR_DataBus *dataBus,
         CLR_UINT8 *dataPtr,
-        NF_Runtime_ISR_HeapOffsetType dataSize,
+        NF_Runtime_ISR_MemoryOffsetType dataSize,
         void *result);
 
     /// <summary>
@@ -63,7 +63,7 @@ typedef struct __nfpack NF_Runtime_ISR_DataBus
     void (*Write)(
         struct NF_Runtime_ISR_DataBus *dataBus,
         CLR_UINT8 *dataPtr,
-        NF_Runtime_ISR_HeapOffsetType dataSize,
+        NF_Runtime_ISR_MemoryOffsetType dataSize,
         void *result);
 
     /// <summary>
@@ -81,9 +81,9 @@ typedef struct __nfpack NF_Runtime_ISR_DataBus
     void (*WriteRead)(
         struct NF_Runtime_ISR_DataBus *dataBus,
         CLR_UINT8 *writeDataPtr,
-        NF_Runtime_ISR_HeapOffsetType writeDataSize,
+        NF_Runtime_ISR_MemoryOffsetType writeDataSize,
         CLR_UINT8 *readDataPtr,
-        NF_Runtime_ISR_HeapOffsetType readDataSize,
+        NF_Runtime_ISR_MemoryOffsetType readDataSize,
         void *result);
 
 } NF_Runtime_ISR_DataBus;
@@ -110,18 +110,18 @@ typedef struct __nfpack NF_Runtime_ISR_InterruptHandler
     CLR_UINT8 *OnInterruptMemory;
     /// <summary>Initialise this value with the <c>OnInterruptHandlers._onInterruptSetArgumentsOffset</c> property
     /// value.</summary>
-    NF_Runtime_ISR_SharedDataOffsetType OnInterruptSetArgumentsOffset;
+    NF_Runtime_ISR_MemoryOffsetType OnInterruptSetArgumentsOffset;
     /// <summary>Initialise this value with the <c>OnInterruptHandlers._onInterruptOffset</c> property value.</summary>
-    NF_Runtime_ISR_SharedDataOffsetType OnInterruptOffset;
+    NF_Runtime_ISR_MemoryOffsetType OnInterruptOffset;
     /// <summary>Initialise this value with the <c>OnInterruptHandlers._afterInterruptMemory</c> property
     /// value.</summary>
     CLR_UINT8 *AfterInterruptMemory;
     /// <summary>Initialise this value with the <c>OnInterruptHandlers._afterInterruptSetArgumentsOffset</c> property
     /// value.</summary>
-    NF_Runtime_ISR_SharedDataOffsetType AfterInterruptSetArgumentsOffset;
+    NF_Runtime_ISR_MemoryOffsetType AfterInterruptSetArgumentsOffset;
     /// <summary>Initialise this value with the <c>OnInterruptHandlers._afterInterruptOffset</c> property
     /// value.</summary>
-    NF_Runtime_ISR_SharedDataOffsetType AfterInterruptOffset;
+    NF_Runtime_ISR_MemoryOffsetType AfterInterruptOffset;
 #ifndef NF_RUNTIME_ISR_UNITTESTS
     /// <summary>Initialise this value with the <c>OnInterruptHandlers._taskMemory</c> property value.</summary>
     void *TaskMemory;
@@ -174,7 +174,7 @@ typedef struct __nfpack NF_Runtime_ISR_ServiceRoutine
     /// interrupt handler.</summary>
     bool CalledFromTask;
     /// <summary>Pass the <c>NF_Runtime_ISR_InterruptHandler.*Offset</c> corresponding to the service routine.</summary>
-    NF_Runtime_ISR_SharedDataOffsetType ServiceRoutineOffset;
+    NF_Runtime_ISR_MemoryOffsetType ServiceRoutineOffset;
     /// <summary>Optional argument to pass to the service routine.</summary>
     NF_Runtime_ISR_ServiceParameterType EventArg;
 } NF_Runtime_ISR_ServiceRoutine;
@@ -204,7 +204,7 @@ typedef struct __nfpack NF_Runtime_ISR_ManagedActivation
     CLR_UINT8 *ServiceRoutineMemory;
     /// <summary>Initialise this value with the <c>OnManagedActivation._serviceRoutineOffset</c> property
     /// value.</summary>
-    NF_Runtime_ISR_SharedDataOffsetType ServiceRoutineOffset;
+    NF_Runtime_ISR_MemoryOffsetType ServiceRoutineOffset;
 #ifndef NF_RUNTIME_ISR_UNITTESTS
     /// <summary>Initialise this value with the <c>OnManagedActivation._managerId</c> property value.</summary>
     CLR_UINT32 ServiceManagerId;
@@ -245,7 +245,7 @@ extern void NF_RunTime_ISR_RunServiceRoutine(NF_Runtime_ISR_ManagedActivation *s
 /// reserved.</param>
 extern CLR_UINT8 *NF_RunTime_ISR_DataBuffer_GetMemory(
     CLR_UINT8 *memory,
-    NF_Runtime_ISR_SharedDataOffsetType offsetOffset);
+    NF_Runtime_ISR_MemoryOffsetType offsetOffset);
 
 /// <summary>
 /// Get the required memory size for the data buffer.
@@ -253,9 +253,9 @@ extern CLR_UINT8 *NF_RunTime_ISR_DataBuffer_GetMemory(
 /// <param name="capacity">The number of elements that can be stored in the buffer.</param>
 /// <param name="elementSize">The size in bytes of an element of the buffer.</param>
 /// <returns>The total amount of memory required.</returns>
-extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_DataBuffer_GetMemorySize(
-    NF_Runtime_ISR_SharedDataOffsetType capacity,
-    NF_Runtime_ISR_HeapOffsetType elementSize);
+extern NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataBuffer_GetMemorySize(
+    NF_Runtime_ISR_MemoryOffsetType capacity,
+    NF_Runtime_ISR_MemoryOffsetType elementSize);
 
 /// <summary>
 /// Initialise the data buffer.
@@ -266,29 +266,29 @@ extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_DataBuffer_GetMemorySi
 /// <param name="elementSize">The size in bytes of an element of the buffer.</param>
 extern void NF_RunTime_ISR_DataBuffer_Initialize(
     CLR_UINT8 *dataBuffer,
-    NF_Runtime_ISR_SharedDataOffsetType capacity,
-    NF_Runtime_ISR_HeapOffsetType elementSize);
+    NF_Runtime_ISR_MemoryOffsetType capacity,
+    NF_Runtime_ISR_MemoryOffsetType elementSize);
 
 /// <summary>
 /// Get the number of elements that can be stored in the buffer.
 /// </summary>
 /// <param name="dataBuffer">Pointer to the memory for the buffer as returned by
 /// <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_DataBuffer_Capacity(CLR_UINT8 *dataBuffer);
+extern NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataBuffer_Capacity(CLR_UINT8 *dataBuffer);
 
 /// <summary>
 /// Get the size in bytes of an element of the buffer.
 /// </summary>
 /// <param name="dataBuffer">Pointer to the memory for the buffer as returned by
 /// <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-extern NF_Runtime_ISR_HeapOffsetType NF_RunTime_ISR_DataBuffer_ElementSize(CLR_UINT8 *dataBuffer);
+extern NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataBuffer_ElementSize(CLR_UINT8 *dataBuffer);
 
 /// <summary>
 /// Get the number of elements that are present in the buffer.
 /// </summary>
 /// <param name="dataBuffer">Pointer to the memory for the buffer as returned by
 /// <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_DataBuffer_Count(CLR_UINT8 *dataBuffer);
+extern NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataBuffer_Count(CLR_UINT8 *dataBuffer);
 
 /// <summary>
 /// Add data to the buffer. No data is added if the buffer is already at capacity.
@@ -307,7 +307,7 @@ extern void NF_RunTime_ISR_DataBuffer_Add(CLR_UINT8 *dataBuffer, CLR_UINT8 *data
 /// <param name="data">Data to add to the buffer.</param>
 extern void NF_RunTime_ISR_DataBuffer_Insert(
     CLR_UINT8 *dataBuffer,
-    NF_Runtime_ISR_SharedDataOffsetType index,
+    NF_Runtime_ISR_MemoryOffsetType index,
     CLR_UINT8 *data);
 
 /// <summary>
@@ -319,7 +319,7 @@ extern void NF_RunTime_ISR_DataBuffer_Insert(
 /// <param name="data">Location to copy the data to.</param>
 extern void NF_RunTime_ISR_DataBuffer_Get(
     CLR_UINT8 *dataBuffer,
-    NF_Runtime_ISR_SharedDataOffsetType index,
+    NF_Runtime_ISR_MemoryOffsetType index,
     CLR_UINT8 *data);
 
 /// <summary>
@@ -335,9 +335,9 @@ extern void NF_RunTime_ISR_DataBuffer_Clear(CLR_UINT8 *dataBuffer);
 /// <param name="capacity">The number of elements that can be stored in the buffer.</param>
 /// <param name="elementSize">The size in bytes of an element of the buffer.</param>
 /// <returns>The total amount of memory required.</returns>
-extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_DataRingBuffer_GetMemorySize(
-    NF_Runtime_ISR_SharedDataOffsetType capacity,
-    NF_Runtime_ISR_HeapOffsetType elementSize);
+extern NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataRingBuffer_GetMemorySize(
+    NF_Runtime_ISR_MemoryOffsetType capacity,
+    NF_Runtime_ISR_MemoryOffsetType elementSize);
 
 /// <summary>
 /// Initialise the data ring buffer.
@@ -348,22 +348,22 @@ extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_DataRingBuffer_GetMemo
 /// <param name="elementSize">The size in bytes of an element of the buffer.</param>
 extern void NF_RunTime_ISR_DataRingBuffer_Initialize(
     CLR_UINT8 *dataBuffer,
-    NF_Runtime_ISR_SharedDataOffsetType capacity,
-    NF_Runtime_ISR_HeapOffsetType elementSize);
+    NF_Runtime_ISR_MemoryOffsetType capacity,
+    NF_Runtime_ISR_MemoryOffsetType elementSize);
 
 /// <summary>
 /// Get the number of elements that can be stored in the ring buffer.
 /// </summary>
 /// <param name="dataBuffer">Pointer to the memory for the buffer as returned by
 /// <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-extern NF_Runtime_ISR_SharedDataOffsetType NF_RunTime_ISR_DataRingBuffer_Capacity(CLR_UINT8 *dataBuffer);
+extern NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataRingBuffer_Capacity(CLR_UINT8 *dataBuffer);
 
 /// <summary>
 /// Get the size in bytes of an element of the ring buffer.
 /// </summary>
 /// <param name="dataBuffer">Pointer to the memory for the buffer as returned by
 /// <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-extern NF_Runtime_ISR_HeapOffsetType NF_RunTime_ISR_DataRingBuffer_ElementSize(CLR_UINT8 *dataBuffer);
+extern NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataRingBuffer_ElementSize(CLR_UINT8 *dataBuffer);
 
 /// <summary>
 /// Indicates whether there are no more messages available.

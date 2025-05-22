@@ -106,7 +106,7 @@ static void ISR_Diagnostics_StackSize(const char *message, CLR_UINT32 highWaterM
 //
 //======================================================================
 
-void *NF_RunTime_ISR_AllocateMemory(InterpreterMemoryType memoryType, NF_Runtime_ISR_SharedDataOffsetType size)
+void *NF_RunTime_ISR_AllocateMemory(InterpreterMemoryType memoryType, NF_Runtime_ISR_MemoryOffsetType size)
 {
 #ifdef ENABLE_ISR_MEMORY_DIAGNOSTICS
     ISR_Diagnostics_Memory("Before AllocateMemory", memoryType);
@@ -196,7 +196,7 @@ void NF_RunTime_ISR_ReleaseRTOSTaskData(void *taskData)
 #endif
 }
 
-void NF_RunTime_ISR_EnableRTOSTask(void *taskData, NF_Runtime_ISR_HeapOffsetType queueSize)
+void NF_RunTime_ISR_EnableRTOSTask(void *taskData, NF_Runtime_ISR_MemoryOffsetType queueSize)
 {
     RTOSTaskData *data = (RTOSTaskData *)taskData;
 

@@ -29,7 +29,7 @@ typedef struct __nfpack GpioPinAsDataBusData
 static void ReadGpioPin(
     NF_Runtime_ISR_DataBus *dataBus,
     CLR_UINT8 *dataPtr,
-    NF_Runtime_ISR_HeapOffsetType dataSize,
+    NF_Runtime_ISR_MemoryOffsetType dataSize,
     void *result)
 {
     bool pinValue;
@@ -40,7 +40,7 @@ static void ReadGpioPin(
 static void WriteGpioPin(
     NF_Runtime_ISR_DataBus *dataBus,
     CLR_UINT8 *dataPtr,
-    NF_Runtime_ISR_HeapOffsetType dataSize,
+    NF_Runtime_ISR_MemoryOffsetType dataSize,
     void *result)
 {
     GpioPinValue pinValue =
@@ -53,7 +53,7 @@ HRESULT Library_nf_runtime_isr_gpio_nanoFramework_Runtime_ISR_GpioPin::GetNative
 {
     NANOCLR_HEADER();
 
-    NF_Runtime_ISR_SharedDataOffsetType result = sizeof(GpioPinAsDataBusData);
+    NF_Runtime_ISR_MemoryOffsetType result = sizeof(GpioPinAsDataBusData);
     SET_RESULT_AS_SHAREDDATAOFFSETTYPE(result);
 
     NANOCLR_NOCLEANUP_NOLABEL();
@@ -97,7 +97,7 @@ HRESULT Library_nf_runtime_isr_gpio_nanoFramework_Runtime_ISR_GpioPin::GetNative
 {
     NANOCLR_HEADER();
 
-    NF_Runtime_ISR_SharedDataOffsetType result = sizeof(NF_Runtime_ISR_InterruptHandler);
+    NF_Runtime_ISR_MemoryOffsetType result = sizeof(NF_Runtime_ISR_InterruptHandler);
     SET_RESULT_AS_SHAREDDATAOFFSETTYPE(result);
 
     NANOCLR_NOCLEANUP_NOLABEL();

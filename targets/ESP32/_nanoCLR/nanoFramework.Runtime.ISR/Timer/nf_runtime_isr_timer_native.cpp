@@ -17,7 +17,7 @@ HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBas
 {
     NANOCLR_HEADER();
 
-    NF_Runtime_ISR_SharedDataOffsetType result = sizeof(NF_Runtime_ISR_InterruptHandler);
+    NF_Runtime_ISR_MemoryOffsetType result = sizeof(NF_Runtime_ISR_InterruptHandler);
     SET_RESULT_AS_SHAREDDATAOFFSETTYPE(result);
 
     NANOCLR_NOCLEANUP_NOLABEL();
@@ -73,7 +73,7 @@ typedef struct __nfpack TimerAsDataBusData
 static void DataBusGetCurrentTime(
     struct NF_Runtime_ISR_DataBus *dataBus,
     CLR_UINT8 *dataPtr,
-    NF_Runtime_ISR_HeapOffsetType dataSize,
+    NF_Runtime_ISR_MemoryOffsetType dataSize,
     void *result)
 {
     *(CLR_UINT64 *)dataPtr = esp_timer_get_time();
@@ -82,7 +82,7 @@ static void DataBusGetCurrentTime(
 static void DataBusSetPeriod(
     struct NF_Runtime_ISR_DataBus *dataBus,
     CLR_UINT8 *dataPtr,
-    NF_Runtime_ISR_HeapOffsetType dataSize,
+    NF_Runtime_ISR_MemoryOffsetType dataSize,
     void *result)
 {
     esp_timer_handle_t timer = ((TimerAsDataBusData *)dataBus)->Timer;
@@ -99,7 +99,7 @@ static void DataBusSetPeriod(
 static void DataBusSetOneShot(
     struct NF_Runtime_ISR_DataBus *dataBus,
     CLR_UINT8 *dataPtr,
-    NF_Runtime_ISR_HeapOffsetType dataSize,
+    NF_Runtime_ISR_MemoryOffsetType dataSize,
     void *result)
 {
     esp_timer_handle_t timer = ((TimerAsDataBusData *)dataBus)->Timer;
@@ -118,7 +118,7 @@ HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBas
 {
     NANOCLR_HEADER();
 
-    NF_Runtime_ISR_SharedDataOffsetType result = sizeof(TimerAsDataBusData);
+    NF_Runtime_ISR_MemoryOffsetType result = sizeof(TimerAsDataBusData);
     SET_RESULT_AS_SHAREDDATAOFFSETTYPE(result);
 
     NANOCLR_NOCLEANUP_NOLABEL();

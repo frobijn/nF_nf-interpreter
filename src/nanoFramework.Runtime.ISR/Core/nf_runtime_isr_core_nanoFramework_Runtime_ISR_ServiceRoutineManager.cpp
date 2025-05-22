@@ -41,7 +41,7 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_HEADER();
     {
         InterpreterMemoryType memoryType = (InterpreterMemoryType)stack.Arg1().NumericByRef().s4;
-        NF_Runtime_ISR_SharedDataOffsetType size = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
+        NF_Runtime_ISR_MemoryOffsetType size = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
         void *memory = NF_RunTime_ISR_AllocateMemory(memoryType, size);
 
         bool result = false;
@@ -86,7 +86,7 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_HEADER();
 
     CLR_UINT8 *memory = (CLR_UINT8 *)GetMemoryPointer(stack);
-    NF_Runtime_ISR_SharedDataOffsetType offset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
+    NF_Runtime_ISR_MemoryOffsetType offset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
     memory += offset;
 
     CLR_RT_HeapBlock_Array *array = stack.Arg3().DereferenceArray();
@@ -105,9 +105,9 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_HEADER();
 
     CLR_UINT8 *memory = (CLR_UINT8 *)GetMemoryPointer(stack);
-    NF_Runtime_ISR_SharedDataOffsetType offsetOffset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
-    NF_Runtime_ISR_SharedDataOffsetType offset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg3());
-    *(NF_Runtime_ISR_SharedDataOffsetType *)(memory + offsetOffset) = offset;
+    NF_Runtime_ISR_MemoryOffsetType offsetOffset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
+    NF_Runtime_ISR_MemoryOffsetType offset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg3());
+    *(NF_Runtime_ISR_MemoryOffsetType *)(memory + offsetOffset) = offset;
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -118,8 +118,8 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_HEADER();
 
     CLR_UINT8 *memory = (CLR_UINT8 *)GetMemoryPointer(stack);
-    NF_Runtime_ISR_SharedDataOffsetType offsetOffset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
-    bool isAssigned = 0 != *(NF_Runtime_ISR_SharedDataOffsetType *)(memory + offsetOffset);
+    NF_Runtime_ISR_MemoryOffsetType offsetOffset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
+    bool isAssigned = 0 != *(NF_Runtime_ISR_MemoryOffsetType *)(memory + offsetOffset);
     stack.SetResult_Boolean(isAssigned);
 
     NANOCLR_NOCLEANUP_NOLABEL();
@@ -131,8 +131,8 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_HEADER();
 
     CLR_UINT8 *memory = (CLR_UINT8 *)GetMemoryPointer(stack);
-    NF_Runtime_ISR_SharedDataOffsetType offsetOffset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
-    NF_Runtime_ISR_SharedDataOffsetType offset = *(NF_Runtime_ISR_SharedDataOffsetType *)(memory + offsetOffset);
+    NF_Runtime_ISR_MemoryOffsetType offsetOffset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
+    NF_Runtime_ISR_MemoryOffsetType offset = *(NF_Runtime_ISR_MemoryOffsetType *)(memory + offsetOffset);
     memory += offset;
     SET_RESULT_AS_INTPTR(memory);
 
@@ -145,7 +145,7 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_HEADER();
 
     CLR_UINT8 *memory = (CLR_UINT8 *)GetMemoryPointer(stack);
-    NF_Runtime_ISR_SharedDataOffsetType offset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
+    NF_Runtime_ISR_MemoryOffsetType offset = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
     memory += offset;
     CLR_RT_HeapBlock_Array *array = stack.Arg3().DereferenceArray();
     if (array != NULL)
@@ -239,7 +239,7 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
                 taskData);
         }
 
-        NF_Runtime_ISR_HeapOffsetType queueSize =
+        NF_Runtime_ISR_MemoryOffsetType queueSize =
             ARG_AS_HEAPOFFSETTYPE(pThis[Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
                                             FIELD___interruptQueueSize]);
 
@@ -319,13 +319,13 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
 }
 
 HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
-    DataBuffer_GetMemorySize___U4__U4__U2(CLR_RT_StackFrame &stack)
+    DataBuffer_GetMemorySize___U4__U4__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    NF_Runtime_ISR_SharedDataOffsetType capacity = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg1());
-    NF_Runtime_ISR_HeapOffsetType elementSize = ARG_AS_HEAPOFFSETTYPE(stack.Arg2());
-    NF_Runtime_ISR_SharedDataOffsetType result = NF_RunTime_ISR_DataBuffer_GetMemorySize(capacity, elementSize);
+    NF_Runtime_ISR_MemoryOffsetType capacity = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg1());
+    NF_Runtime_ISR_MemoryOffsetType elementSize = ARG_AS_HEAPOFFSETTYPE(stack.Arg2());
+    NF_Runtime_ISR_MemoryOffsetType result = NF_RunTime_ISR_DataBuffer_GetMemorySize(capacity, elementSize);
     SET_RESULT_AS_SHAREDDATAOFFSETTYPE(result);
 
     NANOCLR_NOCLEANUP_NOLABEL();
@@ -338,13 +338,13 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
 //----------------------------------------------------------------------
 
 HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
-    DataBuffer_Initialize___VOID__I4__U4__U2(CLR_RT_StackFrame &stack)
+    DataBuffer_Initialize___VOID__I4__U4__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     CLR_UINT8 *dataBuffer = (CLR_UINT8 *)ARG_AS_INTPTR(stack.Arg1());
-    NF_Runtime_ISR_SharedDataOffsetType capacity = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
-    NF_Runtime_ISR_HeapOffsetType elementSize = ARG_AS_HEAPOFFSETTYPE(stack.Arg3());
+    NF_Runtime_ISR_MemoryOffsetType capacity = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
+    NF_Runtime_ISR_MemoryOffsetType elementSize = ARG_AS_HEAPOFFSETTYPE(stack.Arg3());
 
     NF_RunTime_ISR_DataBuffer_Initialize(dataBuffer, capacity, elementSize);
 
@@ -357,7 +357,7 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_HEADER();
 
     CLR_UINT8 *dataBuffer = (CLR_UINT8 *)ARG_AS_INTPTR(stack.Arg1());
-    NF_Runtime_ISR_SharedDataOffsetType capacity = NF_RunTime_ISR_DataBuffer_Capacity(dataBuffer);
+    NF_Runtime_ISR_MemoryOffsetType capacity = NF_RunTime_ISR_DataBuffer_Capacity(dataBuffer);
     SET_RESULT_AS_SHAREDDATAOFFSETTYPE(capacity);
 
     NANOCLR_NOCLEANUP_NOLABEL();
@@ -369,7 +369,7 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_HEADER();
 
     CLR_UINT8 *dataBuffer = (CLR_UINT8 *)ARG_AS_INTPTR(stack.Arg1());
-    NF_Runtime_ISR_SharedDataOffsetType count = NF_RunTime_ISR_DataBuffer_Count(dataBuffer);
+    NF_Runtime_ISR_MemoryOffsetType count = NF_RunTime_ISR_DataBuffer_Count(dataBuffer);
     SET_RESULT_AS_SHAREDDATAOFFSETTYPE(count);
 
     NANOCLR_NOCLEANUP_NOLABEL();
@@ -397,7 +397,7 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_HEADER();
 
     CLR_UINT8 *dataBuffer = (CLR_UINT8 *)ARG_AS_INTPTR(stack.Arg1());
-    NF_Runtime_ISR_SharedDataOffsetType index = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
+    NF_Runtime_ISR_MemoryOffsetType index = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
     CLR_RT_HeapBlock_Array *array = stack.Arg3().DereferenceArray();
     if (array != NULL)
     {
@@ -414,7 +414,7 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_HEADER();
 
     CLR_UINT8 *dataBuffer = (CLR_UINT8 *)ARG_AS_INTPTR(stack.Arg1());
-    NF_Runtime_ISR_SharedDataOffsetType index = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
+    NF_Runtime_ISR_MemoryOffsetType index = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
     CLR_RT_HeapBlock_Array *array = stack.Arg3().DereferenceArray();
     if (array != NULL)
     {
@@ -437,26 +437,26 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
 }
 
 HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
-    DataRingBuffer_GetMemorySize___U4__U4__U2(CLR_RT_StackFrame &stack)
+    DataRingBuffer_GetMemorySize___U4__U4__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    NF_Runtime_ISR_SharedDataOffsetType capacity = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg1());
-    NF_Runtime_ISR_HeapOffsetType elementSize = ARG_AS_HEAPOFFSETTYPE(stack.Arg2());
-    NF_Runtime_ISR_SharedDataOffsetType result = NF_RunTime_ISR_DataRingBuffer_GetMemorySize(capacity, elementSize);
+    NF_Runtime_ISR_MemoryOffsetType capacity = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg1());
+    NF_Runtime_ISR_MemoryOffsetType elementSize = ARG_AS_HEAPOFFSETTYPE(stack.Arg2());
+    NF_Runtime_ISR_MemoryOffsetType result = NF_RunTime_ISR_DataRingBuffer_GetMemorySize(capacity, elementSize);
     SET_RESULT_AS_SHAREDDATAOFFSETTYPE(result);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager::
-    DataRingBuffer_Initialize___VOID__I4__U4__U2(CLR_RT_StackFrame &stack)
+    DataRingBuffer_Initialize___VOID__I4__U4__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     CLR_UINT8 *dataBuffer = (CLR_UINT8 *)ARG_AS_INTPTR(stack.Arg1());
-    NF_Runtime_ISR_SharedDataOffsetType capacity = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
-    NF_Runtime_ISR_HeapOffsetType elementSize = ARG_AS_HEAPOFFSETTYPE(stack.Arg3());
+    NF_Runtime_ISR_MemoryOffsetType capacity = ARG_AS_SHAREDDATAOFFSETTYPE(stack.Arg2());
+    NF_Runtime_ISR_MemoryOffsetType elementSize = ARG_AS_HEAPOFFSETTYPE(stack.Arg3());
 
     NF_RunTime_ISR_DataRingBuffer_Initialize(dataBuffer, capacity, elementSize);
 
@@ -469,7 +469,7 @@ HRESULT Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineMana
     NANOCLR_HEADER();
 
     CLR_UINT8 *dataBuffer = (CLR_UINT8 *)ARG_AS_INTPTR(stack.Arg1());
-    NF_Runtime_ISR_SharedDataOffsetType capacity = NF_RunTime_ISR_DataRingBuffer_Capacity(dataBuffer);
+    NF_Runtime_ISR_MemoryOffsetType capacity = NF_RunTime_ISR_DataRingBuffer_Capacity(dataBuffer);
     SET_RESULT_AS_SHAREDDATAOFFSETTYPE(capacity);
 
     NANOCLR_NOCLEANUP_NOLABEL();

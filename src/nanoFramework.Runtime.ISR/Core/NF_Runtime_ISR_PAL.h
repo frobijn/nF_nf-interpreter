@@ -25,7 +25,7 @@
 /// <param name="memoryType">Type of memory to allocate.</param>
 /// <param name="size">Size of the memory to allocate.</param>
 /// <returns>The pointer to the memory, or the null pointer if the memory cannot be allocated.</returns>
-extern void *NF_RunTime_ISR_AllocateMemory(InterpreterMemoryType memoryType, NF_Runtime_ISR_SharedDataOffsetType size);
+extern void *NF_RunTime_ISR_AllocateMemory(InterpreterMemoryType memoryType, NF_Runtime_ISR_MemoryOffsetType size);
 
 /// <summary>
 /// Release a block of memory
@@ -83,7 +83,7 @@ extern void NF_RunTime_ISR_ReleaseRTOSTaskData(void *taskData);
 /// </summary>
 /// <param name="taskData">The memory returned by <see cref="NF_RunTime_ISR_AllocateRTOSTaskData"/>.</param>
 /// <param name="queueSize">The number of interrupts that can be queued for execution by the task.</param>
-extern void NF_RunTime_ISR_EnableRTOSTask(void *taskData, NF_Runtime_ISR_HeapOffsetType queueSize);
+extern void NF_RunTime_ISR_EnableRTOSTask(void *taskData, NF_Runtime_ISR_MemoryOffsetType queueSize);
 #endif
 
 /// <summary>
