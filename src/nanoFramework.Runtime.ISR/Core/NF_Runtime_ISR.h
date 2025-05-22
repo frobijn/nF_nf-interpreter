@@ -16,11 +16,10 @@
 
 #include <nanoCLR_Interop.h>
 
-#define NF_RUNTIME_ISR_FOR_NANOCLR
-
 #include "nf_runtime_isr_core.h"
 #include "NF_Runtime_ISR_ByteCode.h"
 #include "NF_Runtime_ISR_Interpreter.h"
+#include "NF_Runtime_ISR_PAL.h"
 
 #define ARG_AS_HEAPOFFSETTYPE(arg)            arg.NumericByRef().u2
 #define ARG_AS_SHAREDDATAOFFSETTYPE(arg)      arg.NumericByRef().u4

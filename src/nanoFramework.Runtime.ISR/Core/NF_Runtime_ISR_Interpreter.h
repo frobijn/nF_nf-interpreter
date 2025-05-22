@@ -92,10 +92,10 @@ typedef struct __nfpack NF_Runtime_ISR_DataBus
 /// Method (implemented by the native <c>ServiceRoutineManager.InterpreterBase</c>) that should be called
 /// to raise an event that is handled in managed code.
 /// </summary>
-#ifdef NF_RUNTIME_ISR_FOR_NANOCLR
-typedef void (*NF_RunTime_ISR_RaiseManagedEvent)(CLR_INT32 managerId, CLR_UINT32 eventArg);
-#else
+#ifdef NF_RUNTIME_ISR_UNITTESTS
 typedef void (*NF_RunTime_ISR_RaiseManagedEvent)(CLR_UINT32 eventArg);
+#else
+typedef void (*NF_RunTime_ISR_RaiseManagedEvent)(CLR_INT32 managerId, CLR_UINT32 eventArg);
 #endif
 
 /// <summary>
@@ -122,7 +122,7 @@ typedef struct __nfpack NF_Runtime_ISR_InterruptHandler
     /// <summary>Initialise this value with the <c>OnInterruptHandlers._afterInterruptOffset</c> property
     /// value.</summary>
     NF_Runtime_ISR_SharedDataOffsetType AfterInterruptOffset;
-#ifdef NF_RUNTIME_ISR_FOR_NANOCLR
+#ifndef NF_RUNTIME_ISR_UNITTESTS
     /// <summary>Initialise this value with the <c>OnInterruptHandlers._taskMemory</c> property value.</summary>
     void *TaskMemory;
     /// <summary>Initialise this value with the <c>OnInterruptHandlers._managerId</c> property value.</summary>
@@ -131,6 +131,20 @@ typedef struct __nfpack NF_Runtime_ISR_InterruptHandler
     /// <summary>Method to raise an event that will be handled in managed code.</summary>
     NF_RunTime_ISR_RaiseManagedEvent RaiseManagedEvent;
 } NF_Runtime_ISR_InterruptHandler;
+
+#ifndef NF_RUNTIME_ISR_UNITTESTS
+/// <summary>
+/// Method to initialise the interrupt handler struct from an argument of type
+/// <c>nanoFramework.Runtime.ISR.OnInterruptHandlers</c> that is passed by managed code as part of the
+/// <c>nanoFramework.Runtime.ISR.IInterruptGenerator.Enable</c> implementation.
+/// </summary>
+/// <param name="interruptHandler">Native data that the interrupt generator needs to pass
+/// to <see cref="NF_RunTime_ISR_HandleInterrupt"/> in the interrupt handler.</param>
+/// <param name="onInterruptHandlerArgument">Argument pass by the managed code.</param>
+extern void NF_RunTime_ISR_InitialiseInterruptHandler(
+    NF_Runtime_ISR_InterruptHandler &interruptHandler,
+    CLR_RT_HeapBlock *onInterruptHandlerArgument);
+#endif
 
 /// <summary>
 /// Use the native interpreter to run the service routine(s) in response to an interrupt.
@@ -191,7 +205,7 @@ typedef struct __nfpack NF_Runtime_ISR_ManagedActivation
     /// <summary>Initialise this value with the <c>OnManagedActivation._serviceRoutineOffset</c> property
     /// value.</summary>
     NF_Runtime_ISR_SharedDataOffsetType ServiceRoutineOffset;
-#ifdef NF_RUNTIME_ISR_FOR_NANOCLR
+#ifndef NF_RUNTIME_ISR_UNITTESTS
     /// <summary>Initialise this value with the <c>OnManagedActivation._managerId</c> property value.</summary>
     CLR_UINT32 ServiceManagerId;
 #endif
@@ -199,7 +213,7 @@ typedef struct __nfpack NF_Runtime_ISR_ManagedActivation
     NF_RunTime_ISR_RaiseManagedEvent RaiseManagedEvent;
 } NF_Runtime_ISR_ManagedActivation;
 
-#ifdef NF_RUNTIME_ISR_FOR_NANOCLR
+#ifndef NF_RUNTIME_ISR_UNITTESTS
 /// <summary>
 /// Method to initialise the struct from an argument of type <c>nanoFramework.Runtime.ISR.ManagedActivation</c> that is
 /// passed by managed code.
@@ -389,113 +403,5 @@ extern bool NF_RunTime_ISR_DataRingBuffer_PeekPop(CLR_UINT8 *dataBuffer, CLR_UIN
 /// <param name="dataBuffer">Pointer to the memory for the buffer as returned by
 /// <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
 extern void NF_RunTime_ISR_DataRingBuffer_Clear(CLR_UINT8 *dataBuffer);
-
-//======================================================================
-//
-// Target-dependent methods.
-//
-//======================================================================
-#ifdef NF_RUNTIME_ISR_FOR_NANOCLR
-/// <summary>
-/// Allocate a block of memory.
-/// </summary>
-/// <param name="memoryType">Type of memory to allocate.</param>
-/// <param name="size">Size of the memory to allocate.</param>
-/// <returns>The pointer to the memory, or the null pointer if the memory cannot be allocated.</returns>
-extern void *NF_RunTime_ISR_AllocateMemory(InterpreterMemoryType memoryType, NF_Runtime_ISR_SharedDataOffsetType size);
-
-/// <summary>
-/// Release a block of memory
-/// </summary>
-/// <param name="memoryType">Type of memory to allocate.</param>
-/// <param name="memory">The allocated memory.</param>
-/// <returns>The pointer to the memory, or the null pointer if the memory cannot be allocated.</returns>
-extern void NF_RunTime_ISR_ReleaseMemory(InterpreterMemoryType memoryType, void *memory);
-
-/// <summary>
-/// Allocate the memory required to run an RTOS task that runs the service routine
-/// that is started from managed code.
-/// </summary>
-extern void *NF_RunTime_ISR_AllocateManagedActivationTaskData();
-
-/// <summary>
-/// Release the memory required to run an RTOS task that runs the service routine
-/// that is started from managed code.
-/// </summary>
-/// <param name="taskData">The memory returned by
-/// <see cref="NF_RunTime_ISR_AllocateManagedActivationTaskData"/>.</param>
-extern void NF_RunTime_ISR_ReleaseManagedActivationTaskData(void *taskData);
-
-/// <summary>
-/// Create a RTOS task to run the service routine.
-/// Call the <see cref="NF_RunTime_ISR_RunServiceRoutine"/> method from the task.
-/// </summary>
-/// <param name="taskData">The memory returned by
-/// <see cref="NF_RunTime_ISR_AllocateManagedActivationTaskData"/>.</param>
-/// <param name="serviceRoutine">Description of the service routine to call.</param>
-extern void NF_RunTime_ISR_StartManagedActivationTask(void *taskData, NF_Runtime_ISR_ManagedActivation *serviceRoutine);
-
-/// <summary>
-/// Stop the RTOS task started by <see cref="NF_RunTime_ISR_StartManagedActivationTask"/>.
-/// </summary>
-/// <param name="taskData">The memory returned by
-/// <see cref="NF_RunTime_ISR_AllocateManagedActivationTaskData"/>.</param>
-extern void NF_RunTime_ISR_StopManagedActivationTask(void *taskData);
-
-/// <summary>
-/// Allocate the memory required to run an RTOS task that calls service routines after
-/// an interrupt has been handled.
-/// </summary>
-extern void *NF_RunTime_ISR_AllocateRTOSTaskData();
-
-/// <summary>
-/// Release the memory required to run an RTOS task that calls service routines after
-/// an interrupt has been handled.
-/// </summary>
-/// <param name="taskData">The memory returned by <see cref="NF_RunTime_ISR_AllocateRTOSTaskData"/>.</param>
-extern void NF_RunTime_ISR_ReleaseRTOSTaskData(void *taskData);
-
-/// <summary>
-/// Enable/start the RTOS task that calls service routines after an interrupt has been handled.
-/// </summary>
-/// <param name="taskData">The memory returned by <see cref="NF_RunTime_ISR_AllocateRTOSTaskData"/>.</param>
-/// <param name="queueSize">The number of interrupts that can be queued for execution by the task.</param>
-extern void NF_RunTime_ISR_EnableRTOSTask(void *taskData, NF_Runtime_ISR_HeapOffsetType queueSize);
-
-/// <summary>
-/// Enable/start the RTOS task that calls service routines after an interrupt has been handled.
-/// </summary>
-/// <param name="taskData">The memory returned by <see cref="NF_RunTime_ISR_AllocateRTOSTaskData"/>.</param>
-extern void NF_RunTime_ISR_DisableRTOSTask(void *taskData);
-#endif
-
-/// <summary>
-/// Put the service routine(s) in a queue to be run in a RTOS task.
-/// Call the <see cref="NF_RunTime_ISR_RunFromRTOSTask"/> method from the task.
-/// </summary>
-/// <param name="interruptHandler">Native data required by the native interpreter to run the service routines.</param>
-extern void NF_RunTime_ISR_QueueRTOSTask(NF_Runtime_ISR_InterruptHandler *interruptHandler);
-
-//======================================================================
-//
-// Support for the implementation of (target independent) interrupt
-// generators.
-//
-//======================================================================
-#ifdef NF_RUNTIME_ISR_FOR_NANOCLR
-
-/// <summary>
-/// Method to initialise the interrupt handler struct from an argument of type
-/// <c>nanoFramework.Runtime.ISR.OnInterruptHandlers</c> that is passed by managed code as part of the
-/// <c>nanoFramework.Runtime.ISR.IInterruptGenerator.Enable</c> implementation.
-/// </summary>
-/// <param name="interruptHandler">Native data that the interrupt generator needs to pass
-/// to <see cref="NF_RunTime_ISR_HandleInterrupt"/> in the interrupt handler.</param>
-/// <param name="onInterruptHandlerArgument">Argument pass by the managed code.</param>
-extern void NF_RunTime_ISR_InitialiseInterruptHandler(
-    NF_Runtime_ISR_InterruptHandler &interruptHandler,
-    CLR_RT_HeapBlock *onInterruptHandlerArgument);
-
-#endif
 
 #endif // NF_RUNTIME_ISR_INTERPRETER_H

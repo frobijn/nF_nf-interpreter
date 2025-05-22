@@ -379,19 +379,19 @@ void NF_RunTime_ISR_RunFromRTOSTask(NF_Runtime_ISR_InterruptHandler *interruptHa
     }
 }
 
-#ifdef NF_RUNTIME_ISR_FOR_NANOCLR
+#ifdef NF_RUNTIME_ISR_UNITTESTS
+static bool RunServiceRoutine(
+    ServiceRoutineMemory &memory,
+    CLR_UINT8 *bytecodePtr,
+    NF_Runtime_ISR_ServiceParameterType eventArg,
+    NF_RunTime_ISR_RaiseManagedEvent raiseEvent);
+#else
 static bool RunServiceRoutine(
     ServiceRoutineMemory &memory,
     CLR_UINT8 *bytecodePtr,
     NF_Runtime_ISR_ServiceParameterType eventArg,
     NF_RunTime_ISR_RaiseManagedEvent raiseEvent,
     CLR_INT32 serviceManagerId);
-#else
-static bool RunServiceRoutine(
-    ServiceRoutineMemory &memory,
-    CLR_UINT8 *bytecodePtr,
-    NF_Runtime_ISR_ServiceParameterType eventArg,
-    NF_RunTime_ISR_RaiseManagedEvent raiseEvent);
 #endif
 
 void NF_RunTime_ISR_RunServiceRoutine(NF_Runtime_ISR_ManagedActivation *serviceRoutine)
@@ -432,10 +432,10 @@ void NF_RunTime_ISR_RunServiceRoutine(NF_Runtime_ISR_ManagedActivation *serviceR
             break;
     }
 
-#ifdef NF_RUNTIME_ISR_FOR_NANOCLR
-    RunServiceRoutine(memory, bytecodePtr, 0, serviceRoutine->RaiseManagedEvent, serviceRoutine->ServiceManagerId);
-#else
+#ifdef NF_RUNTIME_ISR_UNITTESTS
     RunServiceRoutine(memory, bytecodePtr, 0, serviceRoutine->RaiseManagedEvent);
+#else
+    RunServiceRoutine(memory, bytecodePtr, 0, serviceRoutine->RaiseManagedEvent, serviceRoutine->ServiceManagerId);
 #endif
 }
 
@@ -491,19 +491,19 @@ bool NF_RunTime_ISR_RunServiceRoutine(NF_Runtime_ISR_ServiceRoutine *serviceRout
             memory.OnInterruptMemory + (serviceRoutine->ServiceRoutineOffset & NF_RUNTIME_ISR_MEMORY_OFFSET_MASK);
     }
 
-#ifdef NF_RUNTIME_ISR_FOR_NANOCLR
+#ifdef NF_RUNTIME_ISR_UNITTESTS
+    return RunServiceRoutine(
+        memory,
+        bytecodePtr,
+        serviceRoutine->EventArg,
+        serviceRoutine->InterruptHandler->RaiseManagedEvent);
+#else
     return RunServiceRoutine(
         memory,
         bytecodePtr,
         serviceRoutine->EventArg,
         serviceRoutine->InterruptHandler->RaiseManagedEvent,
         serviceRoutine->InterruptHandler->ServiceManagerId);
-#else
-    return RunServiceRoutine(
-        memory,
-        bytecodePtr,
-        serviceRoutine->EventArg,
-        serviceRoutine->InterruptHandler->RaiseManagedEvent);
 #endif
 }
 #pragma endregion
@@ -514,24 +514,24 @@ bool NF_RunTime_ISR_RunServiceRoutine(NF_Runtime_ISR_ServiceRoutine *serviceRout
 //
 //----------------------------------------------------------------------
 
-#ifdef NF_RUNTIME_ISR_FOR_NANOCLR
+#ifndef NF_RUNTIME_ISR_UNITTESTS
 #pragma GCC diagnostic ignored "-Wswitch"
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 #endif
 
-#ifdef NF_RUNTIME_ISR_FOR_NANOCLR
+#ifdef NF_RUNTIME_ISR_UNITTESTS
+static bool RunServiceRoutine(
+    ServiceRoutineMemory &memory,
+    CLR_UINT8 *bytecodePtr,
+    NF_Runtime_ISR_ServiceParameterType eventArg,
+    NF_RunTime_ISR_RaiseManagedEvent raiseEvent)
+#else
 static bool RunServiceRoutine(
     ServiceRoutineMemory &memory,
     CLR_UINT8 *bytecodePtr,
     NF_Runtime_ISR_ServiceParameterType eventArg,
     NF_RunTime_ISR_RaiseManagedEvent raiseEvent,
     CLR_INT32 serviceManagerId)
-#else
-static bool RunServiceRoutine(
-    ServiceRoutineMemory &memory,
-    CLR_UINT8 *bytecodePtr,
-    NF_Runtime_ISR_ServiceParameterType eventArg,
-    NF_RunTime_ISR_RaiseManagedEvent raiseEvent)
 #endif
 {
 #pragma region Interpretation of byte code
@@ -1090,10 +1090,10 @@ static bool RunServiceRoutine(
                 }
 
                 case NF_Runtime_ISR_CompiledOpCode::ManagedEventRaise:
-#ifdef NF_RUNTIME_ISR_FOR_NANOCLR
-                    raiseEvent(serviceManagerId, *(CLR_UINT32 *)ReadUnifiedMemoryPointer(&bytecodePtr, memory));
-#else
+#ifdef NF_RUNTIME_ISR_UNITTESTS
                     raiseEvent(*(CLR_UINT32 *)ReadUnifiedMemoryPointer(&bytecodePtr, memory));
+#else
+                    raiseEvent(serviceManagerId, *(CLR_UINT32 *)ReadUnifiedMemoryPointer(&bytecodePtr, memory));
 #endif
                     break;
 #pragma endregion
