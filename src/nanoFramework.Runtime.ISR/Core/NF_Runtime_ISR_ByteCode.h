@@ -14,9 +14,11 @@
 //======================================================================
 
 #if NF_RUNTIME_ISR_TOOLING
+// clang-format off
 // Included in nanoFramework.Runtime.ISR.Tooling
 namespace nanoFramework.Runtime.ISR.Compilation
 {
+// clang-format on
 #endif
 
 // The data used by service routine is stored in four places:
@@ -59,12 +61,38 @@ namespace nanoFramework.Runtime.ISR.Compilation
 //     - 02 = shared RTOS task memory
 //     - 03 = shared managed activation task memory
 
+// Variables and class data fields declared in a *.isr.cs file can be of a native type
+// (only the ones in CompiledDataType are supported), struct or (fixed-size) array of
+// native type/struct. The memory reserved for a variable/field is a contiguous array
+// of bytes. Structs are packed without filler bytes and arrays lack the length property.
+// If a class (data or buffer) field is exposed as property to the regular managed code,
+// a conversion/(de)serialization is required to/from the way the data is stored as
+// managed objects.
+//
+// In a nanoFramework project, the conversion is done in native code because that is much
+// faster than using reflection and byte-level conversions in managed code. To facilitate
+// the conversion, the data type of a field or buffer element is described via an array of
+// bytes. The array is read from the start; the value of a byte can be:
+//
+// - CompiledDataType
+//          The data type is one of the supported native types.
+// - CompiledDataType_IsArray + t
+//          The data type is an array of t (= CompiledDataType or CompiledDataType_IsDataStruct + n).
+// - CompiledDataType_IsDataStruct + n
+//          The type is a data struct with n fields (n < CompiledDataType_MaxFields = 63).
+//          The next bytes are n specifications of the fields. Each field specification starts
+//          with a byte that is the index of the field within the struct, followed by the data
+//          type of the field.
+// 
+// (For testing purposes using the full .NET framework the conversion is done in managed code
+// using reflection and byte-level conversions as there is no other way.)
+
 #if NF_RUNTIME_ISR_TOOLING
+// clang-format off
 /// <summary>
 /// Constants that describe aspects of the native implementation of the ISR features.
 /// </summary>
-public
-static class NativeImplementationConstants
+public static class NativeImplementationConstants
 {
   /// <summary>
   /// Type to use to specify an offset of data in the heap and shared memory.
@@ -95,34 +123,56 @@ static class NativeImplementationConstants
   /// <summary>
   /// Flag to add to an offset in the shared data accessible from an ISR to get its unified memory address.
   /// </summary>
-  public
-    const uint UMAInSharedISRDataFlag = 0x20_00_00_00;
+  public const uint UMAInSharedISRDataFlag = 0x20_00_00_00;
 
-    /// <summary>
-    /// Flag to add to an offset in the shared data accessible from a RTOS task to get its unified memory address.
-    /// </summary>
-  public
-    const uint UMAInSharedTaskDataFlag = 0x40_00_00_00;
+  /// <summary>
+  /// Flag to add to an offset in the shared data accessible from a RTOS task to get its unified memory address.
+  /// </summary>
+  public const uint UMAInSharedTaskDataFlag = 0x40_00_00_00;
 
-    /// <summary>
-    /// Flag to add to an offset in the data accessible from a service routine activated from managed code to get its
-    /// unified memory address.
-    /// </summary>
-  public
-    const uint UMAInManagedActivationDataFlag = 0x60_00_00_00;
+  /// <summary>
+  /// Flag to add to an offset in the data accessible from a service routine activated from managed code to get its
+  /// unified memory address.
+  /// </summary>
+  public const uint UMAInManagedActivationDataFlag = 0x60_00_00_00;
 
-    /// <summary>
-    /// Type to use to specify a near offset within the compiled byte code of a service routine.
-    /// </summary>
-  public
-    const CompiledDataType ByteCodeOffsetType = CompiledDataType.Int32;
+  /// <summary>
+  /// Type to use to specify a near offset within the compiled byte code of a service routine.
+  /// </summary>
+  public const CompiledDataType ByteCodeOffsetType = CompiledDataType.Int32;
 
-    /// <summary>
-    /// The maximum amount of bytes to reserve for a parameter to a service routine.
-    /// </summary>
-  public
-    const CompiledDataType ServiceParameterType = CompiledDataType.UInt32;
+  /// <summary>
+  /// The maximum amount of bytes to reserve for a parameter to a service routine.
+  /// </summary>
+  public const CompiledDataType ServiceParameterType = CompiledDataType.UInt32;
+
+  /// <summary>
+  /// Indicates whether data is an array rather than a single value
+  /// in the description of data for (de)serialization from byte array to managed data v.v..
+  /// </summary>
+  public const int CompiledDataType_IsArray = 0x80;
+
+  /// <summary>
+  /// Indicates whether the data type is a class or struct rather than a native type
+  /// in the description of data for (de)serialization from byte array to managed data v.v..
+  /// </summary>
+  public const int CompiledDataType_IsDataStruct = 0x40;
+
+  /// <summary>
+  /// The maximum number of fields a data structure can have.
+  /// </summary>
+  public const int CompiledDataType_MaxFields = 0x3F;
+
+  /// <summary>
+  /// The binary value of the boolean <see langword="true"/> value.
+  /// </summary>
+  public const byte CompiledDataType_Boolean_True = 0xFF;
+  /// <summary>
+  /// The binary value of the boolean <see langword="false"/> value.
+  /// </summary>
+  public const byte CompiledDataType_Boolean_False = 0;
 }
+// clang-format on
 #else
 typedef CLR_UINT32 NF_Runtime_ISR_MemoryOffsetType;
 typedef CLR_INT32 NF_Runtime_ISR_ByteCodeOffsetType;
@@ -141,34 +191,45 @@ constexpr CLR_UINT32 NF_RUNTIME_ISR_UMA_MEMORYTYPE_RTOSTASK = 0x40000000;
 constexpr CLR_UINT32 NF_RUNTIME_ISR_UMA_MEMORYTYPE_MANAGEDACTIVATION = 0x60000000;
 
 constexpr NF_Runtime_ISR_MemoryOffsetType NF_RUNTIME_ISR_MAXIMUMSHAREDDATASIZE = 0x20000000;
+
+constexpr CLR_UINT8 NF_RUNTIME_ISR_COMPILEDDATATYPE_ISARRAY = 0x80;
+constexpr CLR_UINT8 NF_RUNTIME_ISR_COMPILEDDATATYPE_ISDATASTRUCT = 0x40;
+
+constexpr CLR_UINT8 NF_RUNTIME_ISR_COMPILEDDATATYPE_BOOLEAN_TRUE = 0xFF;
+constexpr CLR_UINT8 NF_RUNTIME_ISR_COMPILEDDATATYPE_BOOLEAN_FALSE = 0x00;
 #endif
 
 #if NF_RUNTIME_ISR_TOOLING
+// clang-format off
 /// <summary>
 /// The supported data types for variables, class data fields and data struct fields.
 /// </summary>
-public enum CompiledDataType
+public enum CompiledDataType // KEEP IN SYNC WITH nanoCLR_DataType enum in nanoFramework.Tools.MetadataProcessor!!
+// clang-format on
 #else
 enum class NF_Runtime_ISR_CompiledDataType : CLR_UINT8
 #endif
-{ Boolean = 1,
-  UInt8,
-  Int8,
-  UInt16,
-  Int16,
-  UInt32,
-  Int32,
-  UInt64,
-  Int64,
-  Single,
-  Double };
+{
+  Boolean = 1,
+  UInt8 = 3,
+  Int8 = 2,
+  UInt16 = 6,
+  Int16 = 5,
+  UInt32 = 8,
+  Int32 = 7,
+  UInt64 = 11,
+  Int64 = 10,
+  Single = 9,
+  Double = 12
+};
 
 #if NF_RUNTIME_ISR_TOOLING
+// clang-format off
 /// <summary>
 /// The types of buffers supported by the ISR interpreter.
 /// </summary>
-public
-enum CompiledDataBufferTypes
+public enum CompiledDataBufferTypes
+// clang-format on
 #else
 enum class NF_Runtime_ISR_CompiledDataBufferType : CLR_UINT8
 #endif
@@ -178,11 +239,12 @@ enum class NF_Runtime_ISR_CompiledDataBufferType : CLR_UINT8
 };
 
 #if NF_RUNTIME_ISR_TOOLING
+// clang-format off
 /// <summary>
 /// The instruction set of the ISR interpreter.
 /// </summary>
-public
-enum CompiledOpCode
+public enum CompiledOpCode
+// clang-format on
 #else
 enum class NF_Runtime_ISR_CompiledOpCode : CLR_UINT8
 #endif

@@ -43,7 +43,10 @@ struct Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManag
     NANOCLR_NATIVE_DECLARE(AssignOffset___VOID__nanoFrameworkRuntimeISRInterpreterMemoryType__U4__U4);
     NANOCLR_NATIVE_DECLARE(IsOffsetAssigned___BOOLEAN__nanoFrameworkRuntimeISRInterpreterMemoryType__U4);
     NANOCLR_NATIVE_DECLARE(GetMemoryPointer___I4__nanoFrameworkRuntimeISRInterpreterMemoryType__U4);
-    NANOCLR_NATIVE_DECLARE(DoReadMemory___VOID__nanoFrameworkRuntimeISRInterpreterMemoryType__U4__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(
+        ReadManagedData___VOID__nanoFrameworkRuntimeISRInterpreterMemoryType__U4__OBJECT__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(
+        WriteManagedData___VOID__nanoFrameworkRuntimeISRInterpreterMemoryType__U4__OBJECT__SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(ReleaseMemory___VOID);
     NANOCLR_NATIVE_DECLARE(DoStartServiceRoutine___VOID__nanoFrameworkRuntimeISROnManagedActivation__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(StopManagedActivatedServiceRoutine___VOID);
@@ -53,17 +56,17 @@ struct Library_nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManag
     NANOCLR_NATIVE_DECLARE(DataBuffer_Initialize___VOID__I4__U4__U4);
     NANOCLR_NATIVE_DECLARE(DataBuffer_Capacity___U4__I4);
     NANOCLR_NATIVE_DECLARE(DataBuffer_Count___U4__I4);
-    NANOCLR_NATIVE_DECLARE(DataBuffer_Add___VOID__I4__SZARRAY_U1);
-    NANOCLR_NATIVE_DECLARE(DataBuffer_Insert___VOID__I4__U4__SZARRAY_U1);
-    NANOCLR_NATIVE_DECLARE(DataBuffer_Get___VOID__I4__U4__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(DataBuffer_Add___VOID__I4__OBJECT__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(DataBuffer_Insert___VOID__I4__U4__OBJECT__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(DataBuffer_Get___VOID__I4__U4__OBJECT__SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(DataBuffer_Clear___VOID__I4);
     NANOCLR_NATIVE_DECLARE(DataRingBuffer_GetMemorySize___U4__U4__U4);
     NANOCLR_NATIVE_DECLARE(DataRingBuffer_Initialize___VOID__I4__U4__U4);
     NANOCLR_NATIVE_DECLARE(DataRingBuffer_Capacity___U4__I4);
     NANOCLR_NATIVE_DECLARE(DataRingBuffer_IsEmpty___BOOLEAN__I4);
-    NANOCLR_NATIVE_DECLARE(DataRingBuffer_Push___BOOLEAN__I4__SZARRAY_U1__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(DataRingBuffer_Peek___BOOLEAN__I4__SZARRAY_U1);
-    NANOCLR_NATIVE_DECLARE(DataRingBuffer_Pop___BOOLEAN__I4__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(DataRingBuffer_Push___BOOLEAN__I4__OBJECT__SZARRAY_U1__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(DataRingBuffer_Peek___BOOLEAN__I4__OBJECT__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(DataRingBuffer_Pop___BOOLEAN__I4__OBJECT__SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(DataRingBuffer_Clear___VOID__I4);
 
     //--//

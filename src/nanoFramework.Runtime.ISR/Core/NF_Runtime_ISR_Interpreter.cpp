@@ -61,7 +61,7 @@ NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataBuffer_Count(CLR_UINT8 *dataB
     return *(NF_Runtime_ISR_MemoryOffsetType *)(dataBuffer + 2 * sizeof(NF_Runtime_ISR_MemoryOffsetType));
 }
 
-void NF_RunTime_ISR_DataBuffer_Add(CLR_UINT8 *dataBuffer, CLR_UINT8 *data)
+CLR_UINT8 *NF_RunTime_ISR_DataBuffer_Add(CLR_UINT8 *dataBuffer, CLR_UINT8 *data)
 {
     NF_Runtime_ISR_MemoryOffsetType capacity = *(NF_Runtime_ISR_MemoryOffsetType *)dataBuffer;
     dataBuffer += sizeof(NF_Runtime_ISR_MemoryOffsetType);
@@ -73,11 +73,20 @@ void NF_RunTime_ISR_DataBuffer_Add(CLR_UINT8 *dataBuffer, CLR_UINT8 *data)
     if (*count < capacity)
     {
         dataBuffer += elementSize * (*count)++;
+        if (data == nullptr)
+        {
+            return dataBuffer;
+        }
         memcpy(dataBuffer, data, elementSize);
     }
+
+    return nullptr;
 }
 
-void NF_RunTime_ISR_DataBuffer_Insert(CLR_UINT8 *dataBuffer, NF_Runtime_ISR_MemoryOffsetType index, CLR_UINT8 *data)
+CLR_UINT8 *NF_RunTime_ISR_DataBuffer_Insert(
+    CLR_UINT8 *dataBuffer,
+    NF_Runtime_ISR_MemoryOffsetType index,
+    CLR_UINT8 *data)
 {
     NF_Runtime_ISR_MemoryOffsetType capacity = *(NF_Runtime_ISR_MemoryOffsetType *)dataBuffer;
     dataBuffer += sizeof(NF_Runtime_ISR_MemoryOffsetType);
@@ -96,12 +105,18 @@ void NF_RunTime_ISR_DataBuffer_Insert(CLR_UINT8 *dataBuffer, NF_Runtime_ISR_Memo
         if (index < *count)
         {
             dataBuffer += elementSize * index;
+            if (data == nullptr)
+            {
+                return dataBuffer;
+            }
             memcpy(dataBuffer, data, elementSize);
         }
     }
+
+    return nullptr;
 }
 
-void NF_RunTime_ISR_DataBuffer_Get(CLR_UINT8 *dataBuffer, NF_Runtime_ISR_MemoryOffsetType index, CLR_UINT8 *data)
+CLR_UINT8 *NF_RunTime_ISR_DataBuffer_Get(CLR_UINT8 *dataBuffer, NF_Runtime_ISR_MemoryOffsetType index, CLR_UINT8 *data)
 {
     dataBuffer += sizeof(NF_Runtime_ISR_MemoryOffsetType);
     NF_Runtime_ISR_MemoryOffsetType elementSize = *(NF_Runtime_ISR_MemoryOffsetType *)dataBuffer;
@@ -112,8 +127,14 @@ void NF_RunTime_ISR_DataBuffer_Get(CLR_UINT8 *dataBuffer, NF_Runtime_ISR_MemoryO
     if (index < count)
     {
         dataBuffer += elementSize * index;
+        if (data == nullptr)
+        {
+            return dataBuffer;
+        }
         memcpy(data, dataBuffer, elementSize);
     }
+
+    return nullptr;
 }
 
 void NF_RunTime_ISR_DataBuffer_Clear(CLR_UINT8 *dataBuffer)
@@ -141,7 +162,7 @@ void NF_RunTime_ISR_DataRingBuffer_Initialize(
     NF_Runtime_ISR_MemoryOffsetType capacity,
     NF_Runtime_ISR_MemoryOffsetType elementSize)
 {
-    *dataBuffer++ = 0xFF;
+    *dataBuffer++ = NF_RUNTIME_ISR_COMPILEDDATATYPE_BOOLEAN_TRUE;
     *(NF_Runtime_ISR_MemoryOffsetType *)dataBuffer = capacity;
     dataBuffer += sizeof(NF_Runtime_ISR_MemoryOffsetType);
     *(NF_Runtime_ISR_MemoryOffsetType *)dataBuffer = elementSize;
@@ -158,10 +179,10 @@ NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataRingBuffer_Capacity(CLR_UINT8
 
 bool NF_RunTime_ISR_DataRingBuffer_IsEmpty(CLR_UINT8 *dataBuffer)
 {
-    return *dataBuffer != 0;
+    return *dataBuffer != NF_RUNTIME_ISR_COMPILEDDATATYPE_BOOLEAN_FALSE;
 }
 
-bool NF_RunTime_ISR_DataRingBuffer_Push(CLR_UINT8 *dataBuffer, CLR_UINT8 *data, bool allowOverwrite)
+CLR_UINT8 *NF_RunTime_ISR_DataRingBuffer_Push(CLR_UINT8 *dataBuffer, CLR_UINT8 *data, bool allowOverwrite, bool &pushed)
 {
     CLR_UINT8 *isEmpty = dataBuffer++;
     NF_Runtime_ISR_MemoryOffsetType capacity = *(NF_Runtime_ISR_MemoryOffsetType *)dataBuffer;
@@ -177,13 +198,14 @@ bool NF_RunTime_ISR_DataRingBuffer_Push(CLR_UINT8 *dataBuffer, CLR_UINT8 *data, 
 
     if (*isEmpty != 0)
     {
-        *isEmpty = 0;
+        *isEmpty = NF_RUNTIME_ISR_COMPILEDDATATYPE_BOOLEAN_FALSE;
     }
     else if (*indexToWriteData == *indexToReadData)
     {
         if (!allowOverwrite)
         {
-            return false;
+            pushed = false;
+            return nullptr;
         }
 
         *indexToReadData = nextIndexToWrite;
@@ -191,17 +213,29 @@ bool NF_RunTime_ISR_DataRingBuffer_Push(CLR_UINT8 *dataBuffer, CLR_UINT8 *data, 
 
     dataBuffer += elementSize * *indexToWriteData;
     *indexToWriteData = nextIndexToWrite;
-    memcpy(dataBuffer, data, elementSize);
-
-    return true;
+    pushed = true;
+    if (data == nullptr)
+    {
+        return dataBuffer;
+    }
+    else
+    {
+        memcpy(dataBuffer, data, elementSize);
+        return nullptr;
+    }
 }
 
-bool NF_RunTime_ISR_DataRingBuffer_PeekPop(CLR_UINT8 *dataBuffer, CLR_UINT8 *data, bool removeFromBuffer)
+CLR_UINT8 *NF_RunTime_ISR_DataRingBuffer_PeekPop(
+    CLR_UINT8 *dataBuffer,
+    CLR_UINT8 *data,
+    bool removeFromBuffer,
+    bool &isAvailable)
 {
     CLR_UINT8 *isEmpty = dataBuffer++;
-    if (*isEmpty != 0)
+    if (*isEmpty != NF_RUNTIME_ISR_COMPILEDDATATYPE_BOOLEAN_FALSE)
     {
-        return false;
+        isAvailable = false;
+        return nullptr;
     }
 
     NF_Runtime_ISR_MemoryOffsetType capacity = *(NF_Runtime_ISR_MemoryOffsetType *)dataBuffer;
@@ -214,23 +248,30 @@ bool NF_RunTime_ISR_DataRingBuffer_PeekPop(CLR_UINT8 *dataBuffer, CLR_UINT8 *dat
     dataBuffer += sizeof(NF_Runtime_ISR_MemoryOffsetType);
 
     dataBuffer += elementSize * *indexToReadData;
-    memcpy(data, dataBuffer, elementSize);
-
     if (removeFromBuffer)
     {
         *indexToReadData = (1 + *indexToReadData) % capacity;
         if (indexToWriteData == *indexToReadData)
         {
-            *isEmpty = 0xFF;
+            *isEmpty = NF_RUNTIME_ISR_COMPILEDDATATYPE_BOOLEAN_TRUE;
         }
     }
 
-    return true;
+    isAvailable = true;
+    if (data == nullptr)
+    {
+        return dataBuffer;
+    }
+    else
+    {
+        memcpy(data, dataBuffer, elementSize);
+        return nullptr;
+    }
 }
 
 void NF_RunTime_ISR_DataRingBuffer_Clear(CLR_UINT8 *dataBuffer)
 {
-    *dataBuffer++ = 0xFF;
+    *dataBuffer++ = NF_RUNTIME_ISR_COMPILEDDATATYPE_BOOLEAN_TRUE;
     dataBuffer += 2 * sizeof(NF_Runtime_ISR_MemoryOffsetType);
     *(NF_Runtime_ISR_MemoryOffsetType *)dataBuffer = 0;
     dataBuffer += sizeof(NF_Runtime_ISR_MemoryOffsetType);
@@ -656,11 +697,14 @@ static bool RunServiceRoutine(
                     bool overwrite = opCode == NF_Runtime_ISR_CompiledOpCode::DataRingBufferPushOverwrite ||
                                      0 != *ReadUnifiedMemoryPointer(&bytecodePtr, memory);
 
-                    bool success = NF_RunTime_ISR_DataRingBuffer_Push(dataBuffer, data, overwrite);
+                    bool success;
+                    NF_RunTime_ISR_DataRingBuffer_Push(dataBuffer, data, overwrite, success);
 
                     if (opCode == NF_Runtime_ISR_CompiledOpCode::DataRingBufferPush)
                     {
-                        *ReadUnifiedMemoryPointer(&bytecodePtr, memory) = success ? 0xFF : 0;
+                        *ReadUnifiedMemoryPointer(&bytecodePtr, memory) =
+                            success ? NF_RUNTIME_ISR_COMPILEDDATATYPE_BOOLEAN_TRUE
+                                    : NF_RUNTIME_ISR_COMPILEDDATATYPE_BOOLEAN_FALSE;
                     }
                     break;
                 }
@@ -673,12 +717,15 @@ static bool RunServiceRoutine(
                     CLR_UINT8 *data = ReadUnifiedMemoryPointer(&bytecodePtr, memory);
                     bool remove = opCode == NF_Runtime_ISR_CompiledOpCode::DataRingBufferPop;
 
-                    bool success = NF_RunTime_ISR_DataRingBuffer_PeekPop(dataBuffer, data, remove);
+                    bool success;
+                    NF_RunTime_ISR_DataRingBuffer_PeekPop(dataBuffer, data, remove, success);
 
                     if (opCode == NF_Runtime_ISR_CompiledOpCode::DataRingBufferPeek ||
                         opCode == NF_Runtime_ISR_CompiledOpCode::DataRingBufferPop)
                     {
-                        *ReadUnifiedMemoryPointer(&bytecodePtr, memory) = success ? 0xFF : 0;
+                        *ReadUnifiedMemoryPointer(&bytecodePtr, memory) =
+                            success ? NF_RUNTIME_ISR_COMPILEDDATATYPE_BOOLEAN_TRUE
+                                    : NF_RUNTIME_ISR_COMPILEDDATATYPE_BOOLEAN_FALSE;
                     }
                     break;
                 }
@@ -919,7 +966,9 @@ static bool RunServiceRoutine(
                 CLR_UINT8 *value2Location = ReadUnifiedMemoryPointer(&bytecodePtr, memory);
 
 #define COMPARISON_OPERATOR(op, type)                                                                                  \
-    *(CLR_UINT8 *)toLocation = (*(type *)value1Location op * (type *)value2Location) ? 0xFF : 0
+    *(CLR_UINT8 *)toLocation = (*(type *)value1Location op * (type *)value2Location)                                   \
+                                   ? NF_RUNTIME_ISR_COMPILEDDATATYPE_BOOLEAN_TRUE                                      \
+                                   : NF_RUNTIME_ISR_COMPILEDDATATYPE_BOOLEAN_FALSE
 
                 switch (opCode)
                 {

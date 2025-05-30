@@ -295,8 +295,12 @@ extern NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataBuffer_Count(CLR_UINT8
 /// </summary>
 /// <param name="dataBuffer">Pointer to the memory for the buffer as returned by
 /// <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-/// <param name="data">Data to add to the buffer.</param>
-extern void NF_RunTime_ISR_DataBuffer_Add(CLR_UINT8 *dataBuffer, CLR_UINT8 *data);
+/// <param name="data">Data to add to the buffer. Pass a null pointer if the caller
+/// uses the returned pointer to pass the data.</param>
+/// <returns>Pointer to the memory where the data has to be copied to.
+/// A null pointer is returned if the buffer is at capacity or if <paramref name="data"/>
+/// is not a null pointer.</returns>    
+extern CLR_UINT8 *NF_RunTime_ISR_DataBuffer_Add(CLR_UINT8 *dataBuffer, CLR_UINT8 *data);
 
 /// <summary>
 /// Add data to the buffer. No data is added if the buffer is already at capacity.
@@ -304,8 +308,12 @@ extern void NF_RunTime_ISR_DataBuffer_Add(CLR_UINT8 *dataBuffer, CLR_UINT8 *data
 /// <param name="dataBuffer">Pointer to the memory for the buffer as returned by
 /// <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
 /// <param name="index">Position in the buffer to store the data.</param>
-/// <param name="data">Data to add to the buffer.</param>
-extern void NF_RunTime_ISR_DataBuffer_Insert(
+/// <param name="data">Data to add to the buffer. Pass a null pointer if the caller
+/// uses the returned pointer to pass the data.</param>
+/// <returns>Pointer to the memory where the data has to be copied to.
+/// A null pointer is returned if the buffer is at capacity or if <paramref name="data"/>
+/// is not a null pointer.</returns>
+extern CLR_UINT8 *NF_RunTime_ISR_DataBuffer_Insert(
     CLR_UINT8 *dataBuffer,
     NF_Runtime_ISR_MemoryOffsetType index,
     CLR_UINT8 *data);
@@ -316,8 +324,11 @@ extern void NF_RunTime_ISR_DataBuffer_Insert(
 /// <param name="dataBuffer">Pointer to the memory for the buffer as returned by
 /// <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
 /// <param name="index">Position in the buffer to get the data from.</param>
-/// <param name="data">Location to copy the data to.</param>
-extern void NF_RunTime_ISR_DataBuffer_Get(
+/// <param name="data">Location to copy the data to. Pass a null pointer if the caller
+/// uses the returned pointer to get the data.</param>
+/// <returns>Pointer to the memory where the data has to be copied from.
+/// A null pointer is returned if <paramref name="data"/> is not a null pointer.</returns>
+extern CLR_UINT8 *NF_RunTime_ISR_DataBuffer_Get(
     CLR_UINT8 *dataBuffer,
     NF_Runtime_ISR_MemoryOffsetType index,
     CLR_UINT8 *data);
@@ -377,25 +388,40 @@ extern bool NF_RunTime_ISR_DataRingBuffer_IsEmpty(CLR_UINT8 *dataBuffer);
 /// </summary>
 /// <param name="dataBuffer">Pointer to the memory for the buffer as returned by
 /// <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-/// <param name="data">Data to add to the buffer.</param>
+/// <param name="data">Data to add to the buffer. Pass a null pointer if the caller
+/// uses the returned pointer to pass the data.</param>
 /// <param name="allowOverwrite">Indicates whether the data is added to the ring buffer
 /// even if it overwrites existing data.</param>
-/// <returns>Indicates whether the data has been added. Returns <see langword="false"/>
+/// <param name="pushed">On return: indicates whether the data has been added. Returns <see langword="false"/>
 /// if <paramref name="allowOverwrite"/> is <see langword="false"/> and the buffer is filled
-/// to capacity.</returns>
-extern bool NF_RunTime_ISR_DataRingBuffer_Push(CLR_UINT8 *dataBuffer, CLR_UINT8 *data, bool allowOverwrite);
+/// to capacity.</param>
+/// <returns>Pointer to the memory where the data has to be copied to.
+/// A null pointer is returned if the buffer is at capacity and <paramref name="allowOverwrite"/> is <see langword="false"/>,
+/// or if <paramref name="data"/> is not a null pointer.</returns>
+extern CLR_UINT8 *NF_RunTime_ISR_DataRingBuffer_Push(
+    CLR_UINT8 *dataBuffer,
+    CLR_UINT8 *data,
+    bool allowOverwrite,
+    bool &pushed);
 
 /// <summary>
 /// Get the next available element in the buffer.
 /// </summary>
 /// <param name="dataBuffer">Pointer to the memory for the buffer as returned by
 /// <see cref="NF_RunTime_ISR_DataBuffer_GetMemory"/>.</param>
-/// <param name="data">Location to copy the data to.</param>
+/// <param name="data">Location to copy the data to. Pass a null pointer if the caller
+/// uses the returned pointer to get the data.</param>
 /// <param name="removeFromBuffer">Indicates whether to remove the data (pop) rather than keep it (peek).</param>
-/// <returns>Indicates whether any data has been returned. If <see langword="false"/>, the
+/// <param name="isAvailable">On return: indicates whether any data was available. If <see langword="false"/>, the
 /// <paramref name="data"/> has an undefined value and does not represent any data read from
-/// the buffer.</returns>
-extern bool NF_RunTime_ISR_DataRingBuffer_PeekPop(CLR_UINT8 *dataBuffer, CLR_UINT8 *data, bool removeFromBuffer);
+/// the buffer.</param>
+/// <returns>Pointer to the memory where the data has to be copied from.
+/// A null pointer is returned if <paramref name="data"/> is not a null pointer or <paramref name="data"/> is false.</returns>
+extern CLR_UINT8 *NF_RunTime_ISR_DataRingBuffer_PeekPop(
+    CLR_UINT8 *dataBuffer,
+    CLR_UINT8 *data,
+    bool removeFromBuffer,
+    bool &isAvailable);
 
 /// <summary>
 /// Clear the buffer.

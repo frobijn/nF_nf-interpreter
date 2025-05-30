@@ -18,7 +18,7 @@ HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBas
     NANOCLR_HEADER();
 
     NF_Runtime_ISR_MemoryOffsetType result = sizeof(NF_Runtime_ISR_InterruptHandler);
-    SET_RESULT_AS_SHAREDDATAOFFSETTYPE(result);
+    SET_RESULT_AS_MEMORYOFFSETTYPE(result);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -119,7 +119,7 @@ HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBas
     NANOCLR_HEADER();
 
     NF_Runtime_ISR_MemoryOffsetType result = sizeof(TimerAsDataBusData);
-    SET_RESULT_AS_SHAREDDATAOFFSETTYPE(result);
+    SET_RESULT_AS_MEMORYOFFSETTYPE(result);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }

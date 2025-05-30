@@ -21,11 +21,10 @@
 #include "NF_Runtime_ISR_Interpreter.h"
 #include "NF_Runtime_ISR_PAL.h"
 
-#define ARG_AS_HEAPOFFSETTYPE(arg)            arg.NumericByRef().u4
-#define ARG_AS_SHAREDDATAOFFSETTYPE(arg)      arg.NumericByRef().u4
+#define ARG_AS_MEMORYOFFSETTYPE(arg)          arg.NumericByRef().u4
 #define ARG_AS_INTPTR(arg)                    (void *)(arg.NumericByRef().s4)
 #define SET_AS_INTPTR(field, x)               field.SetInteger((CLR_INT32)x)
-#define SET_RESULT_AS_SHAREDDATAOFFSETTYPE(x) stack.SetResult_U4(x)
+#define SET_RESULT_AS_MEMORYOFFSETTYPE(x)     stack.SetResult_U4(x)
 #define SET_RESULT_AS_INTPTR(x)               stack.SetResult_I4((CLR_INT32)x)
 
 #endif // !NF_RUNTIME_ISR_H
