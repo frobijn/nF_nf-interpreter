@@ -5,6 +5,41 @@
 
 #include "NF_Runtime_ISR.h"
 
+/*
+Define ENABLE_ISR_MANAGEDREADWRITE_DIAGNOSTICS to report extra information about type incompatibilities
+encountered in the conversion of managed data to/from ISR memory.
+*/
+
+#ifdef ENABLE_ISR_MANAGEDREADWRITE_DIAGNOSTICS
+static void ISR_Diagnostics_IncorrectArrayType(CLR_UINT32 managedArray, CLR_UINT32 elementType)
+{
+    char temporaryStringBuffer[45];
+    int realStringSize = snprintf(
+        temporaryStringBuffer,
+        sizeof(temporaryStringBuffer),
+        "CLR_DataType array: %d, ISR memory: %d\r\n",
+        managedArray,
+        elementType);
+    CLR_EE_DBG_EVENT_BROADCAST(
+        CLR_DBG_Commands_c_Monitor_Message,
+        realStringSize,
+        temporaryStringBuffer,
+        WP_Flags_c_NonCritical | WP_Flags_c_NoCaching);
+}
+
+static void ISR_Diagnostics_IncorrectObjectType(CLR_UINT32 dataType)
+{
+    char temporaryStringBuffer[40];
+    int realStringSize =
+        snprintf(temporaryStringBuffer, sizeof(temporaryStringBuffer), "CLR_DataType managed object: %d\r\n", dataType);
+    CLR_EE_DBG_EVENT_BROADCAST(
+        CLR_DBG_Commands_c_Monitor_Message,
+        realStringSize,
+        temporaryStringBuffer,
+        WP_Flags_c_NonCritical | WP_Flags_c_NoCaching);
+}
+#endif
+
 //----------------------------------------------------------------------
 //
 // Service routine manager functionality
@@ -349,7 +384,10 @@ static HRESULT ReadManagedData(
         {
             if (array->m_typeOfElement != elementType)
             {
-                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+#ifdef ENABLE_ISR_MANAGEDREADWRITE_DIAGNOSTICS
+                ISR_Diagnostics_IncorrectArrayType(array->m_typeOfElement, elementType);
+#endif
+                NANOCLR_MSG_SET_AND_LEAVE(CLR_E_WRONG_TYPE, msg);
             }
 
             CLR_UINT32 numBytes = array->m_numOfElements * array->m_sizeOfElement;
@@ -371,6 +409,9 @@ static HRESULT ReadManagedData(
         if (instanceWithFields->DataType() != CLR_DataType::DATATYPE_VALUETYPE &&
             instanceWithFields->DataType() != CLR_DataType::DATATYPE_CLASS)
         {
+#ifdef ENABLE_ISR_MANAGEDREADWRITE_DIAGNOSTICS
+            ISR_Diagnostics_IncorrectObjectType(instanceWithFields->DataType());
+#endif
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
 
@@ -478,6 +519,9 @@ static HRESULT WriteManagedData(
         {
             if (array->m_typeOfElement != elementType)
             {
+#ifdef ENABLE_ISR_MANAGEDREADWRITE_DIAGNOSTICS
+                ISR_Diagnostics_IncorrectArrayType(array->m_typeOfElement, elementType);
+#endif
                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
             }
 
@@ -500,6 +544,9 @@ static HRESULT WriteManagedData(
         if (instanceWithFields->DataType() != CLR_DataType::DATATYPE_VALUETYPE &&
             instanceWithFields->DataType() != CLR_DataType::DATATYPE_CLASS)
         {
+#ifdef ENABLE_ISR_MANAGEDREADWRITE_DIAGNOSTICS
+            ISR_Diagnostics_IncorrectObjectType(instanceWithFields->DataType());
+#endif
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
 
