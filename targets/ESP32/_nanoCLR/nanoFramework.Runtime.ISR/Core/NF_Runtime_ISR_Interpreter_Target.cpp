@@ -16,7 +16,6 @@
 #define TASK_STACK_SIZE                  4096
 #define TASK_AFTER_INTERRUPT_PRIORITY    13
 #define TASK_MANAGED_ACTIVATION_PRIORITY 10
-#define TASK_QUEUE_TIMEOUT               10
 
 //----------------------------------------------------------------------
 //
@@ -162,7 +161,7 @@ static void AfterInterruptTask(void *arg)
     while (true)
     {
         NF_Runtime_ISR_InterruptHandler *interruptHandler;
-        if (xQueueReceive(data->Queue, &interruptHandler, TASK_QUEUE_TIMEOUT) == pdTRUE)
+        if (xQueueReceive(data->Queue, &interruptHandler, portMAX_DELAY) == pdTRUE)
         {
             NF_RunTime_ISR_RunFromRTOSTask(interruptHandler);
 #ifdef ENABLE_ISR_TASK_DIAGNOSTICS
