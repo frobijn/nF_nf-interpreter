@@ -25,12 +25,14 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_ISR_Gpio =
 {
     "nanoFramework.Runtime.ISR.Gpio",
-    0x2763AD0F,
+    0x368DE7A0,
     method_lookup,
     { 1, 0, 0, 0 }
 };

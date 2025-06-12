@@ -20,20 +20,18 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_Timer::GetInterruptGeneratorMemorySize___U4,
+    Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_Timer::EnableNativeInterruptGenerator___VOID__I4__nanoFrameworkRuntimeISROnInterruptHandlers,
+    Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_Timer::DisableNativeInterruptGenerator___VOID,
+    Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_Timer::GetDataBusMemorySize___U4,
+    Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_Timer::InitialiseDataBus___VOID__I4,
     NULL,
-    NULL,
-    NULL,
-    Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::GetInterruptGeneratorMemorySize___U4,
-    Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::EnableNativeInterruptGenerator___VOID__I4__nanoFrameworkRuntimeISROnInterruptHandlers,
-    Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::DisableNativeInterruptGenerator___VOID,
-    Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::GetDataBusMemorySize___U4,
-    Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::InitialiseDataBus___VOID__I4,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_ISR_Timer =
 {
     "nanoFramework.Runtime.ISR.Timer",
-    0x837BE6EF,
+    0x20473F4F,
     method_lookup,
     { 1, 0, 0, 0 }
 };

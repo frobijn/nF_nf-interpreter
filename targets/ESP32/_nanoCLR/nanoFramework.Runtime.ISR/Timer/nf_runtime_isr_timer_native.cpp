@@ -12,7 +12,7 @@
 //
 //----------------------------------------------------------------------
 
-HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::GetInterruptGeneratorMemorySize___U4(
+HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_Timer::GetInterruptGeneratorMemorySize___U4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -23,7 +23,7 @@ HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBas
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::
+HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_Timer::
     EnableNativeInterruptGenerator___VOID__I4__nanoFrameworkRuntimeISROnInterruptHandlers(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -33,27 +33,25 @@ HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBas
 
         NF_Runtime_ISR_InterruptHandler *interruptData = (NF_Runtime_ISR_InterruptHandler *)ARG_AS_INTPTR(stack.Arg1());
         CLR_RT_HeapBlock *interruptHandlers = stack.Arg2().Dereference();
-        NF_RunTime_ISR_InitialiseInterruptHandler(*interruptData, interruptHandlers);
+        NF_Runtime_ISR_InitialiseInterruptHandler(*interruptData, interruptHandlers);
 
-        NF_RunTime_ISR_InitialiseHighResTimer(
-            pThis[Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::FIELD___timer]
-                .Dereference(),
+        NF_Runtime_ISR_InitialiseHighResTimer(
+            pThis[Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_Timer::FIELD___timer].Dereference(),
             interruptData);
     }
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::
-    DisableNativeInterruptGenerator___VOID(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_Timer::DisableNativeInterruptGenerator___VOID(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-        NF_RunTime_ISR_DisableHighResTimer(
-            pThis[Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::FIELD___timer]
-                .Dereference());
+        NF_Runtime_ISR_DisableHighResTimer(
+            pThis[Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_Timer::FIELD___timer].Dereference());
     }
     NANOCLR_NOCLEANUP();
 }
@@ -70,50 +68,42 @@ typedef struct __nfpack TimerAsDataBusData
     esp_timer_handle_t Timer;
 } TimerAsDataBusData;
 
-static void DataBusGetCurrentTime(
+static void TimerExecute(
     struct NF_Runtime_ISR_DataBus *dataBus,
-    CLR_UINT8 *dataPtr,
-    NF_Runtime_ISR_MemoryOffsetType dataSize,
-    void *result)
+    CLR_UINT8 methodIndex,
+    CLR_UINT8 dataCount,
+    void **dataPtr,
+    NF_Runtime_ISR_MemoryOffsetType *dataSize,
+    void *result,
+    NF_Runtime_ISR_MemoryOffsetType resultSize)
 {
-    *(CLR_UINT64 *)dataPtr = esp_timer_get_time();
-}
-
-static void DataBusSetPeriod(
-    struct NF_Runtime_ISR_DataBus *dataBus,
-    CLR_UINT8 *dataPtr,
-    NF_Runtime_ISR_MemoryOffsetType dataSize,
-    void *result)
-{
-    esp_timer_handle_t timer = ((TimerAsDataBusData *)dataBus)->Timer;
-
-    esp_timer_stop(timer);
-
-    CLR_UINT64 period = *(CLR_UINT64 *)dataPtr;
-    if (period != 0)
+    if (methodIndex == 0)
     {
-        esp_timer_start_periodic(timer, period);
+        *(CLR_UINT64 *)*dataPtr = esp_timer_get_time();
+    }
+    else
+    {
+        esp_timer_handle_t timer = ((TimerAsDataBusData *)dataBus)->Timer;
+        esp_timer_stop(timer);
+        if (methodIndex != 12)
+        {
+            CLR_UINT64 interval = *(CLR_UINT64 *)*dataPtr;
+            if (interval != 0)
+            {
+                if (methodIndex == 10)
+                {
+                    esp_timer_start_once(timer, interval);
+                }
+                else
+                {
+                    esp_timer_start_periodic(timer, interval);
+                }
+            }
+        }
     }
 }
 
-static void DataBusSetOneShot(
-    struct NF_Runtime_ISR_DataBus *dataBus,
-    CLR_UINT8 *dataPtr,
-    NF_Runtime_ISR_MemoryOffsetType dataSize,
-    void *result)
-{
-    esp_timer_handle_t timer = ((TimerAsDataBusData *)dataBus)->Timer;
-
-    esp_timer_stop(timer);
-
-    CLR_UINT64 timeOut = *(CLR_UINT64 *)dataPtr;
-    if (timeOut != 0)
-    {
-        esp_timer_start_once(timer, timeOut);
-    }
-}
-
-HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::GetDataBusMemorySize___U4(
+HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_Timer::GetDataBusMemorySize___U4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -124,31 +114,17 @@ HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBas
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::InitialiseDataBus___VOID__I4(
+HRESULT Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_Timer::InitialiseDataBus___VOID__I4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    {
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
 
-        TimerAsDataBusData *dataBus = (TimerAsDataBusData *)ARG_AS_INTPTR(stack.Arg1());
+    TimerAsDataBusData *dataBus = (TimerAsDataBusData *)ARG_AS_INTPTR(stack.Arg1());
 
-        dataBus->Timer = NF_RunTime_ISR_GetTimerHandle(
-            pThis[Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::FIELD___timer]
-                .Dereference());
+    CLR_RT_HeapBlock *pThis = stack.This();
+    dataBus->Timer = NF_Runtime_ISR_GetTimerHandle(
+        pThis[Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_Timer::FIELD___timer].Dereference());
+    dataBus->Methods.Execute = TimerExecute;
 
-        dataBus->Methods.Read = DataBusGetCurrentTime;
-        if (pThis[Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase::FIELD___singleShot]
-                .NumericByRef()
-                .s4 == 0)
-        {
-            dataBus->Methods.Write = DataBusSetPeriod;
-        }
-        else
-        {
-            dataBus->Methods.Write = DataBusSetOneShot;
-        }
-    }
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }

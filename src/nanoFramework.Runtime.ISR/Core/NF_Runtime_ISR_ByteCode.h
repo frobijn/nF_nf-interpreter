@@ -171,6 +171,11 @@ public static class NativeImplementationConstants
   /// The binary value of the boolean <see langword="false"/> value.
   /// </summary>
   public const byte CompiledDataType_Boolean_False = 0;
+
+  /// <summary>
+  /// The maximum number of arguments that can be passed to a method of a data bus
+  /// </summary>
+  public const int MaxDataBusMethodArguments = 10;
 }
 // clang-format on
 #else
@@ -197,6 +202,8 @@ constexpr CLR_UINT8 NF_RUNTIME_ISR_COMPILEDDATATYPE_ISDATASTRUCT = 0x40;
 
 constexpr CLR_UINT8 NF_RUNTIME_ISR_COMPILEDDATATYPE_BOOLEAN_TRUE = 0xFF;
 constexpr CLR_UINT8 NF_RUNTIME_ISR_COMPILEDDATATYPE_BOOLEAN_FALSE = 0x00;
+
+constexpr CLR_UINT8 NF_RUNTIME_ISR_MAXDATABUSMETHODARGUMENTS = 10;
 #endif
 
 #if NF_RUNTIME_ISR_TOOLING
@@ -286,10 +293,30 @@ enum class NF_Runtime_ISR_CompiledOpCode : CLR_UINT8
     OnNotConditionGoTo = 6,
 
     /// <summary>
+    /// Enter a block of statements that have exclusive access to a shared resource. Argument is the offset
+    /// in unified memory where the mutex is stored that should be used to lock the resource.
+    /// </summary>
+    LockEnterScope = 7,
+
+    /// <summary>
+    /// Exit a block of statements that have exclusive access to a shared resource. Argument is the offset
+    /// in unified memory where the mutex is stored that should be used to lock the resource.
+    /// </summary>
+    LockExitScope = 8,
+
+    /// <summary>
+    /// Wait for a limited amount of time. Argument is the offset in unified memory where the
+    /// UInt32 value is stored that represents the number of microseconds to wait. The actual
+    /// resolution/minimum wait time is device dependent. If the argument is not 0, the wait time
+    /// is always the minimum possible.
+    /// </summary>
+    Sleep = 9,
+
+    /// <summary>
     /// Raise an event that is handled by managed code. Argument is the offset in unified memory where the
     /// UInt32 value is stored that should be passed as an argument.
     /// </summary>
-    ManagedEventRaise = 9,
+    ManagedEventRaise = 10,
 
     // --------------------------------------------------------------------------------
     // Memory operations
@@ -298,36 +325,36 @@ enum class NF_Runtime_ISR_CompiledOpCode : CLR_UINT8
     /// Load literal data into a data location. First argument is the offset in unified memory where the
     /// data should be stored, second is a byte with the number of bytes to load, followed by the bytes to load.
     /// </summary>
-    StoreLiteral = 10,
+    StoreLiteral = 20,
     /// <summary>
     /// Fill the data in the data location with zeros. First argument is the offset in unified memory where the
     /// data should be stored, second is a MemoryOffsetType with the number of bytes to assign zero to.
     /// </summary>
-    StoreZero = 11,
+    StoreZero = 21,
     /// <summary>
     /// Copy data from one data location to another. First argument is the offset in unified memory where the
     /// data should be stored, second is the offset in unified memory where the data should be read from,
     /// third is a MemoryOffsetType with the number of bytes to copy.
     /// </summary>
-    CopyData = 12,
+    CopyData = 22,
     /// <summary>
     /// Copy data from one data location to another, and change the (integer) type in the process. First argument
     /// is the offset in unified memory where the data should be stored, second is the offset in unified memory where
     /// the data should be read from, third is a byte with the type of the data to be read in the high nibble (0xF0) and
     /// the type of the data to be stored in the low nibble (0x0F).
     /// </summary>
-    CopyTypecastData = 13,
+    CopyTypecastData = 23,
     /// <summary>
     /// Copy the data to the heap that is passed as parameter to the service routine. First argument is a byte that
     /// is the number of bytes to copy.
     /// </summary>
-    CopyParameter = 14,
+    CopyParameter = 24,
     /// <summary>
     /// Update a reference to heap or shared data memory by adding an offset to it. First argument is the offset in the memory
     /// (as unified memory address) where the reference resides, second is the offset in unified memory where the
     /// number of elements should be read from, and third is the element size.
     /// </summary>
-    UpdateMemoryOffset = 15,
+    UpdateMemoryOffset = 25,
 
     // --------------------------------------------------------------------------------
     // Integer (and boolean) operations
@@ -336,7 +363,7 @@ enum class NF_Runtime_ISR_CompiledOpCode : CLR_UINT8
     /// Add the 1-byte integer from one data location to another. First argument is the offset in unified memory
     /// that should be updated, second is the offset in unified memory where the value to add should be read from.
     /// </summary>
-    AddInteger8 = 20,
+    AddInteger8 = 35,
     /// <summary>
     /// Add the 2-byte integer from one data location to another. First argument is the offset in unified memory
     /// that should be updated, second is the offset in unified memory where the value to add should be read from.
@@ -945,7 +972,7 @@ enum class NF_Runtime_ISR_CompiledOpCode : CLR_UINT8
     /// allocated for the data buffer. Second argument is the offset in unified memory to the place the capacity should
     /// be stored in.
     /// </summary>
-    DataBufferGetCapacity = 225,
+    DataBufferGetCapacity = 235,
     /// <summary>
     /// Return the number of elements present in the data buffer. First argument is the offset in unified memory to the
     /// (native) data allocated for the data buffer. Second argument is the offset in unified memory to the place the
@@ -1041,43 +1068,24 @@ enum class NF_Runtime_ISR_CompiledOpCode : CLR_UINT8
     // Data bus operations
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Call the Read method of a data bus. First argument is the offset in unified memory to the (native) data
-    /// allocated for the data bus. Second argument is the offset in unified memory to the place the data should be
-    /// stored that is read via the data bus. Third argument is a MemoryOffsetType with the number of bytes to read.
+    /// Call a method of a data bus that does not return a result. First argument is the
+    /// offset in unified memory to the (native) data allocated for the data bus. Second argument
+    /// is a byte with the index of the method. Third argument is a byte with the number of
+    /// arguments for the method. Next are the method arguments, each as a pair of an offset in unified
+    /// memory to the place that holds the argument's value, and the total size of the data stored
+    /// at that place.
     /// </summary>
-    DataBusRead = 250,
+    DataBusMethodWithoutResult = 254,
     /// <summary>
-    /// Call the Write method of a data bus. First argument is the offset in unified memory to the (native) data
-    /// allocated for the data bus. Second argument is the offset in unified memory to the data that should be written
-    /// to the data bus. Third argument is a MemoryOffsetType with the number of bytes to write.
+    /// Call a method of a data bus that returns a result. First argument is the
+    /// offset in unified memory to the (native) data allocated for the data bus. Second argument
+    /// is a byte with the index of the method. Third and fourth arguments are the offset in unified
+    /// memory to store the result in, and the total size of the data stored at that place.
+    /// Fifth argument is a byte with the number of arguments for the method. Next are the method
+    /// arguments, each as a pair of an offset in unified memory to the place that holds the
+    /// argument's value, and the total size of the data stored at that place. 
     /// </summary>
-    DataBusWrite = 251,
-    /// <summary>
-    /// Call the WriteRead method of a data bus. First argument is the offset in unified memory to the (native) data
-    /// allocated for the data bus. Second argument is the offset in unified memory to the data that should be written
-    /// to the data bus. Third argument is a MemoryOffsetType with the number of bytes to write. Fourth argument is the
-    /// offset in unified memory to the place the data should be stored that is read via the data bus. Fifth argument
-    /// is a MemoryOffsetType with the number of bytes to read.
-    /// </summary>
-    DataBusWriteRead = 252,
-    /// <summary>
-    /// Same as <see cref="DataBusRead"/>, but the result of the Read method (other than the data that has been read)
-    /// is also stored. The fourth argument is the offset in unified memory where the result must be stored. The data
-    /// bus implementation knows the size of the result as it defines the result type in the specification.
-    /// </summary>
-    DataBusReadWithResult = 253,
-    /// <summary>
-    /// Same as <see cref="DataBusWrite"/>, but the result of the Write method is also stored. The fourth argument is
-    /// the offset in unified memory where the result must be stored. The data bus
-    /// implementation knows the size of the result as it defines the result type in the specification.
-    /// </summary>
-    DataBusWriteWithResult = 254,
-    /// <summary>
-    /// Same as <see cref="DataBusWriteRead"/>, but the result of the WriteRead method (other than the data that has
-    /// been read) is also stored. The sixth argument is the offset in unified memory where the result must be stored.
-    /// The data bus implementation knows the size of the result as it defines the result type in the specification.
-    /// </summary>
-    DataBusWriteReadWithResult = 255,
+    DataBusMethodWithResult = 255,
 };
 
 #if NF_RUNTIME_ISR_TOOLING

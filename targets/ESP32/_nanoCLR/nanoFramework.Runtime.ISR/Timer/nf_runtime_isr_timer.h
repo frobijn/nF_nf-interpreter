@@ -10,11 +10,9 @@
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
 
-struct Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_TimerInterruptBase
+struct Library_nf_runtime_isr_timer_nanoFramework_Runtime_ISR_Timer
 {
-    static const int FIELD___singleShot = 1;
-    static const int FIELD___timer = 2;
-    static const int FIELD___initialInterval = 3;
+    static const int FIELD___timer = 3;
 
     NANOCLR_NATIVE_DECLARE(GetInterruptGeneratorMemorySize___U4);
     NANOCLR_NATIVE_DECLARE(EnableNativeInterruptGenerator___VOID__I4__nanoFrameworkRuntimeISROnInterruptHandlers);

@@ -19,7 +19,11 @@ list(APPEND nanoFramework.Runtime.ISR.Core_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/sr
 set(nanoFramework.Runtime.ISR.Core_SRCS
 
     nf_runtime_isr_core.cpp
+	nf_runtime_isr_core_nanoFramework_Runtime_ISR_DeviceConfiguration.cpp
+	nf_runtime_isr_core_nanoFramework_Runtime_ISR_NativeDataBuffer.cpp
+	nf_runtime_isr_core_nanoFramework_Runtime_ISR_NativeDataRingBuffer.cpp
     nf_runtime_isr_core_nanoFramework_Runtime_ISR_ServiceRoutineManager.cpp
+	nf_runtime_isr_core_memory.cpp
     NF_Runtime_ISR_Interpreter.cpp
 	NF_Runtime_ISR_Interpreter_nanoCLR.cpp
     NF_Runtime_ISR_Interpreter_Target.cpp

@@ -26,26 +26,38 @@ typedef struct __nfpack GpioPinAsDataBusData
     CLR_RT_HeapBlock *gpioPin;
 } GpioPinAsDataBusData;
 
-static void ReadGpioPin(
-    NF_Runtime_ISR_DataBus *dataBus,
-    CLR_UINT8 *dataPtr,
-    NF_Runtime_ISR_MemoryOffsetType dataSize,
-    void *result)
+static void GpioPinExecute(
+    struct NF_Runtime_ISR_DataBus *dataBus,
+    CLR_UINT8 methodIndex,
+    CLR_UINT8 dataCount,
+    void **dataPtr,
+    NF_Runtime_ISR_MemoryOffsetType *dataSize,
+    void *result,
+    NF_Runtime_ISR_MemoryOffsetType resultSize)
 {
-    bool pinValue;
-    Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Read(((GpioPinAsDataBusData *)dataBus)->gpioPin, pinValue);
-    *dataPtr = pinValue ? GpioPinValue::GpioPinValue_High : GpioPinValue::GpioPinValue_Low;
-}
+    switch (methodIndex)
+    {
+        case 0:
+        {
+            bool pinValue;
+            Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Read(
+                ((GpioPinAsDataBusData *)dataBus)->gpioPin,
+                pinValue);
+            *(CLR_UINT8 *)*dataPtr = pinValue ? GpioPinValue::GpioPinValue_High : GpioPinValue::GpioPinValue_Low;
+            break;
+        }
 
-static void WriteGpioPin(
-    NF_Runtime_ISR_DataBus *dataBus,
-    CLR_UINT8 *dataPtr,
-    NF_Runtime_ISR_MemoryOffsetType dataSize,
-    void *result)
-{
-    GpioPinValue pinValue =
-        *dataPtr == GpioPinValue::GpioPinValue_Low ? GpioPinValue::GpioPinValue_Low : GpioPinValue::GpioPinValue_High;
-    Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Write(((GpioPinAsDataBusData *)dataBus)->gpioPin, pinValue);
+        case 1:
+        {
+            GpioPinValue pinValue = *(GpioPinValue *)*dataPtr == GpioPinValue::GpioPinValue_Low
+                                        ? GpioPinValue::GpioPinValue_Low
+                                        : GpioPinValue::GpioPinValue_High;
+            Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Write(
+                ((GpioPinAsDataBusData *)dataBus)->gpioPin,
+                pinValue);
+            break;
+        }
+    }
 }
 
 HRESULT Library_nf_runtime_isr_gpio_nanoFramework_Runtime_ISR_GpioPin::GetNativeDataBusMemorySize___U4(
@@ -69,8 +81,7 @@ HRESULT Library_nf_runtime_isr_gpio_nanoFramework_Runtime_ISR_GpioPin::Initialis
 
         GpioPinAsDataBusData *dataBus = (GpioPinAsDataBusData *)ARG_AS_INTPTR(stack.Arg1());
 
-        dataBus->Methods.Read = ReadGpioPin;
-        dataBus->Methods.Write = WriteGpioPin;
+        dataBus->Methods.Execute = GpioPinExecute;
         dataBus->gpioPin =
             pThis[Library_nf_runtime_isr_gpio_nanoFramework_Runtime_ISR_GpioPin::FIELD___gpioPin].Dereference();
         FAULT_ON_NULL(dataBus->gpioPin);
@@ -86,7 +97,7 @@ HRESULT Library_nf_runtime_isr_gpio_nanoFramework_Runtime_ISR_GpioPin::Initialis
 
 static void ISR_InterruptHandler(void *param, GpioPinValue pinValue)
 {
-    NF_RunTime_ISR_HandleInterrupt(
+    NF_Runtime_ISR_HandleInterrupt(
         (NF_Runtime_ISR_InterruptHandler *)param,
         pinValue == GpioPinValue::GpioPinValue_Low ? PinEventTypes::PinEventTypes_Falling
                                                    : PinEventTypes::PinEventTypes_Rising);
@@ -113,7 +124,7 @@ HRESULT Library_nf_runtime_isr_gpio_nanoFramework_Runtime_ISR_GpioPin::
 
         NF_Runtime_ISR_InterruptHandler *interruptData = (NF_Runtime_ISR_InterruptHandler *)ARG_AS_INTPTR(stack.Arg1());
         CLR_RT_HeapBlock *interruptHandlers = stack.Arg2().Dereference();
-        NF_RunTime_ISR_InitialiseInterruptHandler(*interruptData, interruptHandlers);
+        NF_Runtime_ISR_InitialiseInterruptHandler(*interruptData, interruptHandlers);
 
         CLR_RT_HeapBlock *gpioPin =
             pThis[Library_nf_runtime_isr_gpio_nanoFramework_Runtime_ISR_GpioPin::FIELD___gpioPin].Dereference();

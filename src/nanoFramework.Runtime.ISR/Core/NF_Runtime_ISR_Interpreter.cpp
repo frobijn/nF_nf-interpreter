@@ -21,12 +21,12 @@
 //
 //----------------------------------------------------------------------
 #pragma region Data buffer
-CLR_UINT8 *NF_RunTime_ISR_DataBuffer_GetMemory(CLR_UINT8 *memory, NF_Runtime_ISR_MemoryOffsetType offsetOffset)
+CLR_UINT8 *NF_Runtime_ISR_DataBuffer_GetMemory(CLR_UINT8 *memory, NF_Runtime_ISR_MemoryOffsetType offsetOffset)
 {
     return memory + *(NF_Runtime_ISR_MemoryOffsetType *)(memory + offsetOffset);
 }
 
-NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataBuffer_GetMemorySize(
+NF_Runtime_ISR_MemoryOffsetType NF_Runtime_ISR_DataBuffer_GetMemorySize(
     NF_Runtime_ISR_MemoryOffsetType capacity,
     NF_Runtime_ISR_MemoryOffsetType elementSize)
 {
@@ -34,7 +34,7 @@ NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataBuffer_GetMemorySize(
     return 3 * (NF_Runtime_ISR_MemoryOffsetType)sizeof(NF_Runtime_ISR_MemoryOffsetType) + capacity * elementSize;
 }
 
-void NF_RunTime_ISR_DataBuffer_Initialize(
+void NF_Runtime_ISR_DataBuffer_Initialize(
     CLR_UINT8 *dataBuffer,
     NF_Runtime_ISR_MemoryOffsetType capacity,
     NF_Runtime_ISR_MemoryOffsetType elementSize)
@@ -46,22 +46,22 @@ void NF_RunTime_ISR_DataBuffer_Initialize(
     *(NF_Runtime_ISR_MemoryOffsetType *)dataBuffer = 0;
 }
 
-NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataBuffer_Capacity(CLR_UINT8 *dataBuffer)
+NF_Runtime_ISR_MemoryOffsetType NF_Runtime_ISR_DataBuffer_Capacity(CLR_UINT8 *dataBuffer)
 {
     return *(NF_Runtime_ISR_MemoryOffsetType *)dataBuffer;
 }
 
-NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataBuffer_ElementSize(CLR_UINT8 *dataBuffer)
+NF_Runtime_ISR_MemoryOffsetType NF_Runtime_ISR_DataBuffer_ElementSize(CLR_UINT8 *dataBuffer)
 {
     return *(NF_Runtime_ISR_MemoryOffsetType *)(dataBuffer + sizeof(NF_Runtime_ISR_MemoryOffsetType));
 }
 
-NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataBuffer_Count(CLR_UINT8 *dataBuffer)
+NF_Runtime_ISR_MemoryOffsetType NF_Runtime_ISR_DataBuffer_Count(CLR_UINT8 *dataBuffer)
 {
     return *(NF_Runtime_ISR_MemoryOffsetType *)(dataBuffer + 2 * sizeof(NF_Runtime_ISR_MemoryOffsetType));
 }
 
-CLR_UINT8 *NF_RunTime_ISR_DataBuffer_Add(CLR_UINT8 *dataBuffer, CLR_UINT8 *data)
+CLR_UINT8 *NF_Runtime_ISR_DataBuffer_Add(CLR_UINT8 *dataBuffer, CLR_UINT8 *data)
 {
     NF_Runtime_ISR_MemoryOffsetType capacity = *(NF_Runtime_ISR_MemoryOffsetType *)dataBuffer;
     dataBuffer += sizeof(NF_Runtime_ISR_MemoryOffsetType);
@@ -83,10 +83,7 @@ CLR_UINT8 *NF_RunTime_ISR_DataBuffer_Add(CLR_UINT8 *dataBuffer, CLR_UINT8 *data)
     return nullptr;
 }
 
-CLR_UINT8 *NF_RunTime_ISR_DataBuffer_Insert(
-    CLR_UINT8 *dataBuffer,
-    NF_Runtime_ISR_MemoryOffsetType index,
-    CLR_UINT8 *data)
+CLR_UINT8 *NF_Runtime_ISR_DataBuffer_Set(CLR_UINT8 *dataBuffer, NF_Runtime_ISR_MemoryOffsetType index, CLR_UINT8 *data)
 {
     NF_Runtime_ISR_MemoryOffsetType capacity = *(NF_Runtime_ISR_MemoryOffsetType *)dataBuffer;
     dataBuffer += sizeof(NF_Runtime_ISR_MemoryOffsetType);
@@ -116,7 +113,7 @@ CLR_UINT8 *NF_RunTime_ISR_DataBuffer_Insert(
     return nullptr;
 }
 
-CLR_UINT8 *NF_RunTime_ISR_DataBuffer_Get(CLR_UINT8 *dataBuffer, NF_Runtime_ISR_MemoryOffsetType index, CLR_UINT8 *data)
+CLR_UINT8 *NF_Runtime_ISR_DataBuffer_Get(CLR_UINT8 *dataBuffer, NF_Runtime_ISR_MemoryOffsetType index, CLR_UINT8 *data)
 {
     dataBuffer += sizeof(NF_Runtime_ISR_MemoryOffsetType);
     NF_Runtime_ISR_MemoryOffsetType elementSize = *(NF_Runtime_ISR_MemoryOffsetType *)dataBuffer;
@@ -137,14 +134,14 @@ CLR_UINT8 *NF_RunTime_ISR_DataBuffer_Get(CLR_UINT8 *dataBuffer, NF_Runtime_ISR_M
     return nullptr;
 }
 
-void NF_RunTime_ISR_DataBuffer_Clear(CLR_UINT8 *dataBuffer)
+void NF_Runtime_ISR_DataBuffer_Clear(CLR_UINT8 *dataBuffer)
 {
     *(NF_Runtime_ISR_MemoryOffsetType *)(dataBuffer + 2 * sizeof(NF_Runtime_ISR_MemoryOffsetType)) = 0;
 }
 #pragma endregion
 
 #pragma region Ring buffer
-NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataRingBuffer_GetMemorySize(
+NF_Runtime_ISR_MemoryOffsetType NF_Runtime_ISR_DataRingBuffer_GetMemorySize(
     NF_Runtime_ISR_MemoryOffsetType capacity,
     NF_Runtime_ISR_MemoryOffsetType elementSize)
 {
@@ -152,12 +149,12 @@ NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataRingBuffer_GetMemorySize(
     return 4 * (NF_Runtime_ISR_MemoryOffsetType)sizeof(NF_Runtime_ISR_MemoryOffsetType) + 1 + capacity * elementSize;
 }
 
-NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataRingBuffer_ElementSize(CLR_UINT8 *dataBuffer)
+NF_Runtime_ISR_MemoryOffsetType NF_Runtime_ISR_DataRingBuffer_ElementSize(CLR_UINT8 *dataBuffer)
 {
     return *(NF_Runtime_ISR_MemoryOffsetType *)(dataBuffer + sizeof(NF_Runtime_ISR_MemoryOffsetType) + 1);
 }
 
-void NF_RunTime_ISR_DataRingBuffer_Initialize(
+void NF_Runtime_ISR_DataRingBuffer_Initialize(
     CLR_UINT8 *dataBuffer,
     NF_Runtime_ISR_MemoryOffsetType capacity,
     NF_Runtime_ISR_MemoryOffsetType elementSize)
@@ -172,17 +169,17 @@ void NF_RunTime_ISR_DataRingBuffer_Initialize(
     *(NF_Runtime_ISR_MemoryOffsetType *)dataBuffer = 0;
 }
 
-NF_Runtime_ISR_MemoryOffsetType NF_RunTime_ISR_DataRingBuffer_Capacity(CLR_UINT8 *dataBuffer)
+NF_Runtime_ISR_MemoryOffsetType NF_Runtime_ISR_DataRingBuffer_Capacity(CLR_UINT8 *dataBuffer)
 {
     return *(NF_Runtime_ISR_MemoryOffsetType *)++dataBuffer;
 }
 
-bool NF_RunTime_ISR_DataRingBuffer_IsEmpty(CLR_UINT8 *dataBuffer)
+bool NF_Runtime_ISR_DataRingBuffer_IsEmpty(CLR_UINT8 *dataBuffer)
 {
     return *dataBuffer != NF_RUNTIME_ISR_COMPILEDDATATYPE_BOOLEAN_FALSE;
 }
 
-CLR_UINT8 *NF_RunTime_ISR_DataRingBuffer_Push(CLR_UINT8 *dataBuffer, CLR_UINT8 *data, bool allowOverwrite, bool &pushed)
+CLR_UINT8 *NF_Runtime_ISR_DataRingBuffer_Push(CLR_UINT8 *dataBuffer, CLR_UINT8 *data, bool allowOverwrite, bool &pushed)
 {
     CLR_UINT8 *isEmpty = dataBuffer++;
     NF_Runtime_ISR_MemoryOffsetType capacity = *(NF_Runtime_ISR_MemoryOffsetType *)dataBuffer;
@@ -225,7 +222,7 @@ CLR_UINT8 *NF_RunTime_ISR_DataRingBuffer_Push(CLR_UINT8 *dataBuffer, CLR_UINT8 *
     }
 }
 
-CLR_UINT8 *NF_RunTime_ISR_DataRingBuffer_PeekPop(
+CLR_UINT8 *NF_Runtime_ISR_DataRingBuffer_PeekPop(
     CLR_UINT8 *dataBuffer,
     CLR_UINT8 *data,
     bool removeFromBuffer,
@@ -269,7 +266,7 @@ CLR_UINT8 *NF_RunTime_ISR_DataRingBuffer_PeekPop(
     }
 }
 
-void NF_RunTime_ISR_DataRingBuffer_Clear(CLR_UINT8 *dataBuffer)
+void NF_Runtime_ISR_DataRingBuffer_Clear(CLR_UINT8 *dataBuffer)
 {
     *dataBuffer++ = NF_RUNTIME_ISR_COMPILEDDATATYPE_BOOLEAN_TRUE;
     dataBuffer += 2 * sizeof(NF_Runtime_ISR_MemoryOffsetType);
@@ -354,7 +351,7 @@ __forceinline
 #pragma endregion
 
 #pragma region Service routines and tasks
-void NF_RunTime_ISR_HandleInterrupt(
+void NF_Runtime_ISR_HandleInterrupt(
     NF_Runtime_ISR_InterruptHandler *interruptHandler,
     NF_Runtime_ISR_ServiceParameterType eventArg)
 {
@@ -368,7 +365,7 @@ void NF_RunTime_ISR_HandleInterrupt(
         if (interruptHandler->OnInterruptSetArgumentsOffset != 0)
         {
             serviceRoutine.ServiceRoutineOffset = interruptHandler->OnInterruptSetArgumentsOffset;
-            if (!NF_RunTime_ISR_RunServiceRoutine(&serviceRoutine))
+            if (!NF_Runtime_ISR_RunServiceRoutine(&serviceRoutine))
             {
                 return;
             }
@@ -378,7 +375,7 @@ void NF_RunTime_ISR_HandleInterrupt(
         if (interruptHandler->OnInterruptOffset != 0)
         {
             serviceRoutine.ServiceRoutineOffset = interruptHandler->OnInterruptOffset;
-            if (!NF_RunTime_ISR_RunServiceRoutine(&serviceRoutine))
+            if (!NF_Runtime_ISR_RunServiceRoutine(&serviceRoutine))
             {
                 return;
             }
@@ -387,11 +384,11 @@ void NF_RunTime_ISR_HandleInterrupt(
 
     if (interruptHandler->AfterInterruptSetArgumentsOffset != 0 || interruptHandler->AfterInterruptOffset != 0)
     {
-        NF_RunTime_ISR_QueueRTOSTask(interruptHandler);
+        NF_Runtime_ISR_QueueRTOSTask(interruptHandler);
     }
 }
 
-void NF_RunTime_ISR_RunFromRTOSTask(NF_Runtime_ISR_InterruptHandler *interruptHandler)
+void NF_Runtime_ISR_RunFromRTOSTask(NF_Runtime_ISR_InterruptHandler *interruptHandler)
 {
     if (interruptHandler->AfterInterruptSetArgumentsOffset != 0 || interruptHandler->AfterInterruptOffset != 0)
     {
@@ -403,7 +400,7 @@ void NF_RunTime_ISR_RunFromRTOSTask(NF_Runtime_ISR_InterruptHandler *interruptHa
         if (interruptHandler->AfterInterruptSetArgumentsOffset != 0)
         {
             serviceRoutine.ServiceRoutineOffset = interruptHandler->AfterInterruptSetArgumentsOffset;
-            if (!NF_RunTime_ISR_RunServiceRoutine(&serviceRoutine))
+            if (!NF_Runtime_ISR_RunServiceRoutine(&serviceRoutine))
             {
                 return;
             }
@@ -412,27 +409,18 @@ void NF_RunTime_ISR_RunFromRTOSTask(NF_Runtime_ISR_InterruptHandler *interruptHa
         if (interruptHandler->AfterInterruptOffset != 0)
         {
             serviceRoutine.ServiceRoutineOffset = interruptHandler->AfterInterruptOffset;
-            NF_RunTime_ISR_RunServiceRoutine(&serviceRoutine);
+            NF_Runtime_ISR_RunServiceRoutine(&serviceRoutine);
         }
     }
 }
 
-#ifdef NF_RUNTIME_ISR_UNITTESTS
 static bool RunServiceRoutine(
-    ServiceRoutineMemory &memory,
+    CONFIGURATION_ARGUMENT_COMMA ServiceRoutineMemory &memory,
     CLR_UINT8 *bytecodePtr,
     NF_Runtime_ISR_ServiceParameterType eventArg,
-    NF_RunTime_ISR_RaiseManagedEvent raiseEvent);
-#else
-static bool RunServiceRoutine(
-    ServiceRoutineMemory &memory,
-    CLR_UINT8 *bytecodePtr,
-    NF_Runtime_ISR_ServiceParameterType eventArg,
-    NF_RunTime_ISR_RaiseManagedEvent raiseEvent,
-    CLR_INT32 serviceManagerId);
-#endif
+    NF_Runtime_ISR_RaiseManagedEvent raiseEvent);
 
-void NF_RunTime_ISR_RunServiceRoutine(NF_Runtime_ISR_ManagedActivation *serviceRoutine)
+void NF_Runtime_ISR_RunServiceRoutine(NF_Runtime_ISR_ManagedActivation *serviceRoutine)
 {
     if (serviceRoutine == nullptr || serviceRoutine->ServiceRoutineOffset == 0)
     {
@@ -469,14 +457,14 @@ void NF_RunTime_ISR_RunServiceRoutine(NF_Runtime_ISR_ManagedActivation *serviceR
             break;
     }
 
-#ifdef NF_RUNTIME_ISR_UNITTESTS
-    RunServiceRoutine(memory, bytecodePtr, 0, serviceRoutine->RaiseManagedEvent);
+#ifdef HAS_CONFIGURATION
+    RunServiceRoutine(serviceRoutine->Configuration, memory, bytecodePtr, 0, serviceRoutine->RaiseManagedEvent);
 #else
-    RunServiceRoutine(memory, bytecodePtr, 0, serviceRoutine->RaiseManagedEvent, serviceRoutine->ServiceManagerId);
+    RunServiceRoutine(memory, bytecodePtr, 0, serviceRoutine->RaiseManagedEvent);
 #endif
 }
 
-bool NF_RunTime_ISR_RunServiceRoutine(NF_Runtime_ISR_ServiceRoutine *serviceRoutine)
+bool NF_Runtime_ISR_RunServiceRoutine(NF_Runtime_ISR_ServiceRoutine *serviceRoutine)
 {
     if (serviceRoutine == nullptr || serviceRoutine->ServiceRoutineOffset == 0)
     {
@@ -527,8 +515,9 @@ bool NF_RunTime_ISR_RunServiceRoutine(NF_Runtime_ISR_ServiceRoutine *serviceRout
             memory.OnInterruptMemory + (serviceRoutine->ServiceRoutineOffset & NF_RUNTIME_ISR_UMA_OFFSET_MASK);
     }
 
-#ifdef NF_RUNTIME_ISR_UNITTESTS
+#ifdef HAS_CONFIGURATION
     return RunServiceRoutine(
+        serviceRoutine->InterruptHandler->Configuration,
         memory,
         bytecodePtr,
         serviceRoutine->EventArg,
@@ -538,8 +527,7 @@ bool NF_RunTime_ISR_RunServiceRoutine(NF_Runtime_ISR_ServiceRoutine *serviceRout
         memory,
         bytecodePtr,
         serviceRoutine->EventArg,
-        serviceRoutine->InterruptHandler->RaiseManagedEvent,
-        serviceRoutine->InterruptHandler->ServiceManagerId);
+        serviceRoutine->InterruptHandler->RaiseManagedEvent);
 #endif
 }
 #pragma endregion
@@ -555,20 +543,11 @@ bool NF_RunTime_ISR_RunServiceRoutine(NF_Runtime_ISR_ServiceRoutine *serviceRout
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 #endif
 
-#ifdef NF_RUNTIME_ISR_UNITTESTS
 static bool RunServiceRoutine(
-    ServiceRoutineMemory &memory,
+    CONFIGURATION_ARGUMENT_COMMA ServiceRoutineMemory &memory,
     CLR_UINT8 *bytecodePtr,
     NF_Runtime_ISR_ServiceParameterType eventArg,
-    NF_RunTime_ISR_RaiseManagedEvent raiseEvent)
-#else
-static bool RunServiceRoutine(
-    ServiceRoutineMemory &memory,
-    CLR_UINT8 *bytecodePtr,
-    NF_Runtime_ISR_ServiceParameterType eventArg,
-    NF_RunTime_ISR_RaiseManagedEvent raiseEvent,
-    CLR_INT32 serviceManagerId)
-#endif
+    NF_Runtime_ISR_RaiseManagedEvent raiseEvent)
 {
 #ifdef NF_RUNTIME_ISR_UNITTESTS
     // For debugging, finding bytecode position for exception.
@@ -580,46 +559,37 @@ static bool RunServiceRoutine(
     {
         NF_Runtime_ISR_CompiledOpCode opCode = *(NF_Runtime_ISR_CompiledOpCode *)bytecodePtr++;
 
-        if (opCode >= NF_Runtime_ISR_CompiledOpCode::DataBusRead)
+        if (opCode >= NF_Runtime_ISR_CompiledOpCode::DataBusMethodWithoutResult)
         {
 #pragma region Data bus
             NF_Runtime_ISR_DataBus *dataBus = (NF_Runtime_ISR_DataBus *)ReadUnifiedMemoryPointer(&bytecodePtr, memory);
-            CLR_UINT8 *buffer1Location = ReadUnifiedMemoryPointer(&bytecodePtr, memory);
-            NF_Runtime_ISR_MemoryOffsetType buffer1Size = *(NF_Runtime_ISR_MemoryOffsetType *)bytecodePtr;
-            bytecodePtr += sizeof(NF_Runtime_ISR_MemoryOffsetType);
-            CLR_UINT8 *resultLocation = nullptr;
-
-            switch (opCode)
+            CLR_UINT8 methodIndex = *bytecodePtr++;
+            void *result = nullptr;
+            NF_Runtime_ISR_MemoryOffsetType resultSize = 0;
+            if (opCode == NF_Runtime_ISR_CompiledOpCode::DataBusMethodWithResult)
             {
-                case NF_Runtime_ISR_CompiledOpCode::DataBusReadWithResult:
-                    resultLocation = ReadUnifiedMemoryPointer(&bytecodePtr, memory);
-                case NF_Runtime_ISR_CompiledOpCode::DataBusRead:
-                    dataBus->Read(dataBus, buffer1Location, buffer1Size, resultLocation);
-                    break;
+                result = ReadUnifiedMemoryPointer(&bytecodePtr, memory);
+                resultSize = *(NF_Runtime_ISR_MemoryOffsetType *)bytecodePtr;
+                bytecodePtr += sizeof(NF_Runtime_ISR_MemoryOffsetType);
+            }
 
-                case NF_Runtime_ISR_CompiledOpCode::DataBusWriteWithResult:
-                    resultLocation = ReadUnifiedMemoryPointer(&bytecodePtr, memory);
-                case NF_Runtime_ISR_CompiledOpCode::DataBusWrite:
-                    dataBus->Write(dataBus, buffer1Location, buffer1Size, resultLocation);
-                    break;
-
-                case NF_Runtime_ISR_CompiledOpCode::DataBusWriteRead:
-                case NF_Runtime_ISR_CompiledOpCode::DataBusWriteReadWithResult:
-                    CLR_UINT8 *buffer2Location = ReadUnifiedMemoryPointer(&bytecodePtr, memory);
-                    NF_Runtime_ISR_MemoryOffsetType buffer2Size = *(NF_Runtime_ISR_MemoryOffsetType *)bytecodePtr;
+            CLR_UINT8 numArguments = *bytecodePtr++;
+            if (numArguments == 0)
+            {
+                dataBus->Execute(dataBus, methodIndex, 0, nullptr, nullptr, result, resultSize);
+            }
+            else
+            {
+                void *dataPtr[NF_RUNTIME_ISR_MAXDATABUSMETHODARGUMENTS]{};
+                NF_Runtime_ISR_MemoryOffsetType dataSize[NF_RUNTIME_ISR_MAXDATABUSMETHODARGUMENTS]{};
+                for (CLR_INT8 i = 0; i < numArguments; i++)
+                {
+                    dataPtr[i] = ReadUnifiedMemoryPointer(&bytecodePtr, memory);
+                    dataSize[i] = *(NF_Runtime_ISR_MemoryOffsetType *)bytecodePtr;
                     bytecodePtr += sizeof(NF_Runtime_ISR_MemoryOffsetType);
-                    if (opCode == NF_Runtime_ISR_CompiledOpCode::DataBusWriteReadWithResult)
-                    {
-                        resultLocation = ReadUnifiedMemoryPointer(&bytecodePtr, memory);
-                    }
-                    dataBus->WriteRead(
-                        dataBus,
-                        buffer1Location,
-                        buffer1Size,
-                        buffer2Location,
-                        buffer2Size,
-                        resultLocation);
-                    break;
+                }
+
+                dataBus->Execute(dataBus, methodIndex, numArguments, dataPtr, dataSize, result, resultSize);
             }
 #pragma endregion
         }
@@ -632,21 +602,21 @@ static bool RunServiceRoutine(
                 case NF_Runtime_ISR_CompiledOpCode::DataBufferGetCapacity:
                 {
                     CLR_UINT8 *returnValue = ReadUnifiedMemoryPointer(&bytecodePtr, memory);
-                    *(NF_Runtime_ISR_MemoryOffsetType *)returnValue = NF_RunTime_ISR_DataBuffer_Capacity(dataBuffer);
+                    *(NF_Runtime_ISR_MemoryOffsetType *)returnValue = NF_Runtime_ISR_DataBuffer_Capacity(dataBuffer);
                     break;
                 }
 
                 case NF_Runtime_ISR_CompiledOpCode::DataBufferGetCount:
                 {
                     CLR_UINT8 *returnValue = ReadUnifiedMemoryPointer(&bytecodePtr, memory);
-                    *(NF_Runtime_ISR_MemoryOffsetType *)returnValue = NF_RunTime_ISR_DataBuffer_Count(dataBuffer);
+                    *(NF_Runtime_ISR_MemoryOffsetType *)returnValue = NF_Runtime_ISR_DataBuffer_Count(dataBuffer);
                     break;
                 }
 
                 case NF_Runtime_ISR_CompiledOpCode::DataBufferAdd:
                 {
                     CLR_UINT8 *data = ReadUnifiedMemoryPointer(&bytecodePtr, memory);
-                    NF_RunTime_ISR_DataBuffer_Add(dataBuffer, data);
+                    NF_Runtime_ISR_DataBuffer_Add(dataBuffer, data);
                     break;
                 }
 
@@ -655,7 +625,7 @@ static bool RunServiceRoutine(
                     NF_Runtime_ISR_MemoryOffsetType index =
                         *(NF_Runtime_ISR_MemoryOffsetType *)ReadUnifiedMemoryPointer(&bytecodePtr, memory);
                     CLR_UINT8 *data = ReadUnifiedMemoryPointer(&bytecodePtr, memory);
-                    NF_RunTime_ISR_DataBuffer_Insert(dataBuffer, index, data);
+                    NF_Runtime_ISR_DataBuffer_Set(dataBuffer, index, data);
                     break;
                 }
 
@@ -664,13 +634,13 @@ static bool RunServiceRoutine(
                     NF_Runtime_ISR_MemoryOffsetType index =
                         *(NF_Runtime_ISR_MemoryOffsetType *)ReadUnifiedMemoryPointer(&bytecodePtr, memory);
                     CLR_UINT8 *data = ReadUnifiedMemoryPointer(&bytecodePtr, memory);
-                    NF_RunTime_ISR_DataBuffer_Get(dataBuffer, index, data);
+                    NF_Runtime_ISR_DataBuffer_Get(dataBuffer, index, data);
                     break;
                 }
 
                 case NF_Runtime_ISR_CompiledOpCode::DataBufferClear:
                 {
-                    NF_RunTime_ISR_DataBuffer_Clear(dataBuffer);
+                    NF_Runtime_ISR_DataBuffer_Clear(dataBuffer);
                     break;
                 }
 
@@ -678,14 +648,14 @@ static bool RunServiceRoutine(
                 {
                     CLR_UINT8 *returnValue = ReadUnifiedMemoryPointer(&bytecodePtr, memory);
                     *(NF_Runtime_ISR_MemoryOffsetType *)returnValue =
-                        NF_RunTime_ISR_DataRingBuffer_Capacity(dataBuffer);
+                        NF_Runtime_ISR_DataRingBuffer_Capacity(dataBuffer);
                     break;
                 }
 
                 case NF_Runtime_ISR_CompiledOpCode::DataRingBufferIsEmpty:
                 {
                     CLR_UINT8 *returnValue = ReadUnifiedMemoryPointer(&bytecodePtr, memory);
-                    *(NF_Runtime_ISR_MemoryOffsetType *)returnValue = NF_RunTime_ISR_DataRingBuffer_IsEmpty(dataBuffer);
+                    *(NF_Runtime_ISR_MemoryOffsetType *)returnValue = NF_Runtime_ISR_DataRingBuffer_IsEmpty(dataBuffer);
                     break;
                 }
 
@@ -698,7 +668,7 @@ static bool RunServiceRoutine(
                                      0 != *ReadUnifiedMemoryPointer(&bytecodePtr, memory);
 
                     bool success;
-                    NF_RunTime_ISR_DataRingBuffer_Push(dataBuffer, data, overwrite, success);
+                    NF_Runtime_ISR_DataRingBuffer_Push(dataBuffer, data, overwrite, success);
 
                     if (opCode == NF_Runtime_ISR_CompiledOpCode::DataRingBufferPush)
                     {
@@ -718,7 +688,7 @@ static bool RunServiceRoutine(
                     bool remove = opCode == NF_Runtime_ISR_CompiledOpCode::DataRingBufferPop;
 
                     bool success;
-                    NF_RunTime_ISR_DataRingBuffer_PeekPop(dataBuffer, data, remove, success);
+                    NF_Runtime_ISR_DataRingBuffer_PeekPop(dataBuffer, data, remove, success);
 
                     if (opCode == NF_Runtime_ISR_CompiledOpCode::DataRingBufferPeek ||
                         opCode == NF_Runtime_ISR_CompiledOpCode::DataRingBufferPop)
@@ -732,7 +702,7 @@ static bool RunServiceRoutine(
 
                 case NF_Runtime_ISR_CompiledOpCode::DataRingBufferClear:
                 {
-                    NF_RunTime_ISR_DataRingBuffer_Clear(dataBuffer);
+                    NF_Runtime_ISR_DataRingBuffer_Clear(dataBuffer);
                     break;
                 }
 #pragma endregion
@@ -1136,11 +1106,31 @@ static bool RunServiceRoutine(
                     break;
                 }
 
+                case NF_Runtime_ISR_CompiledOpCode::LockEnterScope:
+                {
+                    NF_Runtime_ISR_LockEnterScope(ReadUnifiedMemoryPointer(&bytecodePtr, memory));
+                    break;
+                }
+
+                case NF_Runtime_ISR_CompiledOpCode::LockExitScope:
+                {
+                    NF_Runtime_ISR_LockExitScope(ReadUnifiedMemoryPointer(&bytecodePtr, memory));
+                    break;
+                }
+
+                case NF_Runtime_ISR_CompiledOpCode::Sleep:
+                {
+                    NF_Runtime_ISR_Sleep(*(CLR_UINT32 *)ReadUnifiedMemoryPointer(&bytecodePtr, memory));
+                    break;
+                }
+
                 case NF_Runtime_ISR_CompiledOpCode::ManagedEventRaise:
-#ifdef NF_RUNTIME_ISR_UNITTESTS
-                    raiseEvent(*(CLR_UINT32 *)ReadUnifiedMemoryPointer(&bytecodePtr, memory));
+#ifdef HAS_CONFIGURATION
+                    raiseEvent(
+                        configuration->ServiceManagerId,
+                        *(CLR_UINT32 *)ReadUnifiedMemoryPointer(&bytecodePtr, memory));
 #else
-                    raiseEvent(serviceManagerId, *(CLR_UINT32 *)ReadUnifiedMemoryPointer(&bytecodePtr, memory));
+                    raiseEvent(*(CLR_UINT32 *)ReadUnifiedMemoryPointer(&bytecodePtr, memory));
 #endif
                     break;
 #pragma endregion

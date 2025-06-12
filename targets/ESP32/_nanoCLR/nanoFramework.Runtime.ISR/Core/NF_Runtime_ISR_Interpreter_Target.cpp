@@ -12,10 +12,11 @@
 // Global settings
 //
 //----------------------------------------------------------------------
-#define MEMORY_ALLOCATION                MALLOC_CAP_8BIT
-#define TASK_STACK_SIZE                  4096
-#define TASK_AFTER_INTERRUPT_PRIORITY    13
-#define TASK_MANAGED_ACTIVATION_PRIORITY 10
+#define MEMORY_ALLOCATION                        MALLOC_CAP_8BIT
+#define DEFAULT_INTERRUPT_QUEUE_SIZE             16
+#define DEFAULT_TASK_STACK_SIZE                  4096
+#define DEFAULT_TASK_AFTER_INTERRUPT_PRIORITY    13
+#define DEFAULT_TASK_MANAGED_ACTIVATION_PRIORITY 10
 
 //----------------------------------------------------------------------
 //
@@ -77,7 +78,7 @@ static void ISR_Diagnostics_Memory(const char *method, InterpreterMemoryType mem
 
 #define ISR_DIAGNOSTICS_STACK_SIZE 1500
 
-static void ISR_Diagnostics_StackSize(const char *message, CLR_UINT32 highWaterMark)
+static void ISR_Diagnostics_StackSize(const char *message, CLR_UINT32 usedStackSize)
 {
     char temporaryStringBuffer[100];
     int realStringSize = snprintf(
@@ -85,7 +86,7 @@ static void ISR_Diagnostics_StackSize(const char *message, CLR_UINT32 highWaterM
         sizeof(temporaryStringBuffer),
         "Used stack size (%s): %d\r\n",
         message,
-        TASK_STACK_SIZE + ISR_DIAGNOSTICS_STACK_SIZE - highWaterMark);
+        usedStackSize);
     CLR_EE_DBG_EVENT_BROADCAST(
         CLR_DBG_Commands_c_Monitor_Message,
         realStringSize,
@@ -101,17 +102,37 @@ static void ISR_Diagnostics_StackSize(const char *message, CLR_UINT32 highWaterM
 
 //======================================================================
 //
+// Configuration and state
+//
+//======================================================================
+struct RTOSTaskData;
+struct ManagedActivationTaskData;
+
+typedef struct __nfpack NF_Runtime_ISR_Esp32_Configuration
+{
+    NF_Runtime_ISR_Configuration Shared;
+    struct RTOSTaskData *AfterInterruptTask;
+    struct ManagedActivationTaskData *ManagedActivationTask;
+} NF_Runtime_ISR_Esp32_Configuration;
+
+NF_Runtime_ISR_MemoryOffsetType NF_Runtime_ISR_GetConfigurationMemorySize()
+{
+    return sizeof(NF_Runtime_ISR_Esp32_Configuration);
+}
+
+//======================================================================
+//
 // Memory allocation.
 //
 //======================================================================
 
-void *NF_RunTime_ISR_AllocateMemory(InterpreterMemoryType memoryType, NF_Runtime_ISR_MemoryOffsetType size)
+static void *AllocateMemory(
+    InterpreterMemoryType memoryType,
+    NF_Runtime_ISR_MemoryOffsetType size,
+    bool isISRMemorySpecial)
 {
-#ifdef ENABLE_ISR_MEMORY_DIAGNOSTICS
-    ISR_Diagnostics_Memory("Before AllocateMemory", memoryType);
-#endif
     void *memory;
-    if (InterpreterMemoryType::InterpreterMemoryType_ISR)
+    if (memoryType == InterpreterMemoryType::InterpreterMemoryType_ISR && isISRMemorySpecial)
     {
         memory = heap_caps_malloc(size, MEMORY_ALLOCATION | MALLOC_CAP_INTERNAL);
     }
@@ -124,19 +145,112 @@ void *NF_RunTime_ISR_AllocateMemory(InterpreterMemoryType memoryType, NF_Runtime
             MEMORY_ALLOCATION | MALLOC_CAP_SPIRAM);
     }
 
-#ifdef ENABLE_ISR_MEMORY_DIAGNOSTICS
-    ISR_Diagnostics_Memory("After AllocateMemory", memoryType);
-#endif
+    if (memory != nullptr)
+    {
+        memset(memory, 0, size);
+    }
+
     return memory;
 }
 
-void NF_RunTime_ISR_ReleaseMemory(InterpreterMemoryType memoryType, void *memory)
+HRESULT NF_Runtime_ISR_AllocateMemory(
+    InterpreterMemoryType memoryType,
+    NF_Runtime_ISR_MemoryOffsetType size,
+    bool isISRMemorySpecial,
+    void **memory)
 {
-    heap_caps_free(memory);
+    NANOCLR_HEADER();
+
+#ifdef ENABLE_ISR_MEMORY_DIAGNOSTICS
+    ISR_Diagnostics_Memory("Before AllocateMemory", memoryType);
+#endif
+    *memory = AllocateMemory(memoryType, size, isISRMemorySpecial);
+
+    if (*memory == nullptr)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+#ifdef ENABLE_ISR_MEMORY_DIAGNOSTICS
+    ISR_Diagnostics_Memory("After AllocateMemory", memoryType);
+#endif
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT NF_Runtime_ISR_ReleaseMemory(
+    NF_Runtime_ISR_Configuration *configuration,
+    InterpreterMemoryType memoryType,
+    void *memory)
+{
+    NANOCLR_HEADER();
+
+    if (memory != nullptr)
+    {
+        heap_caps_free(memory);
+    }
 
 #ifdef ENABLE_ISR_MEMORY_DIAGNOSTICS
     ISR_Diagnostics_Memory("After ReleaseMemory", memoryType);
 #endif
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+//======================================================================
+//
+// Locks
+//
+//======================================================================
+
+NF_Runtime_ISR_MemoryOffsetType NF_Runtime_ISR_LockGetMemorySize()
+{
+    return sizeof(SemaphoreHandle_t);
+}
+
+HRESULT NF_Runtime_ISR_LockInitialise(void *mutex)
+{
+    NANOCLR_HEADER();
+
+    *(SemaphoreHandle_t *)mutex = xSemaphoreCreateMutex();
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT NF_Runtime_ISR_LockRelease(void *mutex)
+{
+    NANOCLR_HEADER();
+
+    vSemaphoreDelete(*(SemaphoreHandle_t *)mutex);
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+void NF_Runtime_ISR_LockEnterScope(void *mutex)
+{
+    while (true)
+    {
+        if (xSemaphoreTake(*(SemaphoreHandle_t *)mutex, portMAX_DELAY))
+        {
+            return;
+        }
+    }
+}
+
+void NF_Runtime_ISR_LockExitScope(void *mutex)
+{
+    xSemaphoreGive(*(SemaphoreHandle_t *)mutex);
+}
+
+//======================================================================
+//
+// Sleep
+//
+//======================================================================
+
+void NF_Runtime_ISR_Sleep(CLR_UINT32 time_us)
+{
+    TickType_t delay = pdMS_TO_TICKS(time_us) / (TickType_t)1000U;
+    vTaskDelay(delay == 0 ? 1 : delay);
 }
 
 //======================================================================
@@ -145,107 +259,170 @@ void NF_RunTime_ISR_ReleaseMemory(InterpreterMemoryType memoryType, void *memory
 //
 //======================================================================
 
-static const char *TAG = "ISR";
-
 typedef struct RTOSTaskData
 {
     TaskHandle_t Task;
     StaticTask_t TaskBuffer;
     QueueHandle_t Queue;
-    StackType_t Stack[TASK_STACK_SIZE + ISR_DIAGNOSTICS_STACK_SIZE];
+    StackType_t Stack[ISR_DIAGNOSTICS_STACK_SIZE];
 } RTOSTaskData;
 
 static void AfterInterruptTask(void *arg)
 {
-    RTOSTaskData *data = (RTOSTaskData *)arg;
+    NF_Runtime_ISR_Esp32_Configuration *state = (NF_Runtime_ISR_Esp32_Configuration *)arg;
     while (true)
     {
         NF_Runtime_ISR_InterruptHandler *interruptHandler;
-        if (xQueueReceive(data->Queue, &interruptHandler, portMAX_DELAY) == pdTRUE)
+        if (xQueueReceive(state->AfterInterruptTask->Queue, &interruptHandler, portMAX_DELAY) == pdTRUE)
         {
-            NF_RunTime_ISR_RunFromRTOSTask(interruptHandler);
+            if (state->Shared.MonitorResourceUse)
+            {
+                CLR_UINT32 required = 1 + uxQueueMessagesWaiting(state->AfterInterruptTask->Queue);
+                if (state->Shared.RequiredInterruptQueueSize < required)
+                {
+                    state->Shared.RequiredInterruptQueueSize = required;
+                }
+            }
+
+            NF_Runtime_ISR_RunFromRTOSTask(interruptHandler);
 #ifdef ENABLE_ISR_TASK_DIAGNOSTICS
-            ISR_Diagnostics_StackSize("RTOS task", uxTaskGetStackHighWaterMark2(NULL));
+            CLR_UINT32 usedStackSize =
+                state->Shared.AfterInterruptStackSize + ISR_DIAGNOSTICS_STACK_SIZE - uxTaskGetStackHighWaterMark2(NULL);
+            ISR_Diagnostics_StackSize("RTOS task", usedStackSize);
+            if (state->Shared.MonitorResourceUse && state->Shared.RequiredAfterInterruptStackSize < usedStackSize)
+            {
+                state->Shared.RequiredAfterInterruptStackSize = usedStackSize;
+            }
+#else
+            if (state->Shared.MonitorResourceUse)
+            {
+                CLR_UINT32 usedStackSize = state->Shared.AfterInterruptStackSize + ISR_DIAGNOSTICS_STACK_SIZE -
+                                           uxTaskGetStackHighWaterMark2(NULL);
+                if (state->Shared.RequiredAfterInterruptStackSize < usedStackSize)
+                {
+                    state->Shared.RequiredAfterInterruptStackSize = usedStackSize;
+                }
+            }
 #endif
         }
     }
 }
 
-void *NF_RunTime_ISR_AllocateRTOSTaskData()
+HRESULT NF_Runtime_ISR_AllocateRTOSTaskData(NF_Runtime_ISR_Configuration *configuration)
 {
-    void *taskData = heap_caps_malloc(sizeof(RTOSTaskData), MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
-    if (taskData == nullptr)
+    NANOCLR_HEADER();
+
+    NF_Runtime_ISR_Esp32_Configuration *state = (NF_Runtime_ISR_Esp32_Configuration *)configuration;
+    if (state->AfterInterruptTask == nullptr)
     {
-        ESP_LOGE(TAG, "Failed to allocate RTOS task data");
+        if (configuration->AfterInterruptStackSize == 0)
+        {
+            configuration->AfterInterruptStackSize = DEFAULT_TASK_STACK_SIZE;
+        }
+
+        NF_Runtime_ISR_MemoryOffsetType size = sizeof(RTOSTaskData) + configuration->AfterInterruptStackSize;
+        void *taskData =
+            AllocateMemory(InterpreterMemoryType::InterpreterMemoryType_ISR, size, configuration->IsISRMemorySpecial);
+        if (taskData == nullptr)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        }
+
+        state->AfterInterruptTask = (RTOSTaskData *)taskData;
+#ifdef ENABLE_ISR_MEMORY_DIAGNOSTICS
+        ISR_Diagnostics_Memory("After AllocateRTOSTaskData", InterpreterMemoryType_ISR);
+#endif
     }
 
-    memset(taskData, 0, sizeof(RTOSTaskData));
-#ifdef ENABLE_ISR_MEMORY_DIAGNOSTICS
-    ISR_Diagnostics_Memory("After AllocateRTOSTaskData", InterpreterMemoryType_ISR);
-#endif
-    return taskData;
+    NANOCLR_NOCLEANUP();
 }
 
-void NF_RunTime_ISR_ReleaseRTOSTaskData(void *taskData)
+HRESULT NF_Runtime_ISR_ReleaseRTOSTaskData(NF_Runtime_ISR_Configuration *configuration)
 {
-    heap_caps_free(taskData);
+    NANOCLR_HEADER();
+
+    NF_Runtime_ISR_Esp32_Configuration *state = (NF_Runtime_ISR_Esp32_Configuration *)configuration;
+    if (state->AfterInterruptTask != nullptr)
+    {
+        heap_caps_free(state->AfterInterruptTask);
+        state->AfterInterruptTask = nullptr;
+    }
 
 #ifdef ENABLE_ISR_MEMORY_DIAGNOSTICS
     ISR_Diagnostics_Memory("After ReleaseRTOSTaskData", InterpreterMemoryType_ISR);
 #endif
+
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-void NF_RunTime_ISR_EnableRTOSTask(void *taskData, NF_Runtime_ISR_MemoryOffsetType queueSize)
+HRESULT NF_Runtime_ISR_EnableRTOSTask(NF_Runtime_ISR_Configuration *configuration)
 {
-    RTOSTaskData *data = (RTOSTaskData *)taskData;
+    NANOCLR_HEADER();
 
-    data->Queue = xQueueCreate(queueSize, sizeof(NF_Runtime_ISR_InterruptHandler *));
-    if (!data->Queue)
+    NF_Runtime_ISR_Esp32_Configuration *state = (NF_Runtime_ISR_Esp32_Configuration *)configuration;
+
+    if (state->Shared.InterruptQueueSize == 0)
     {
-        ESP_LOGE(TAG, "Failed to create queue for RTOS task");
-        return;
+        state->Shared.InterruptQueueSize = DEFAULT_INTERRUPT_QUEUE_SIZE;
     }
 
-    data->Task = xTaskCreateStatic(
+    if (state->Shared.AfterInterruptPriority == 0)
+    {
+        state->Shared.AfterInterruptPriority = DEFAULT_TASK_AFTER_INTERRUPT_PRIORITY;
+    }
+
+    state->AfterInterruptTask->Queue =
+        xQueueCreate(state->Shared.InterruptQueueSize, sizeof(NF_Runtime_ISR_InterruptHandler *));
+    if (!state->AfterInterruptTask->Queue)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    state->AfterInterruptTask->Task = xTaskCreateStatic(
         AfterInterruptTask,
         "ISR-RTOS-Task",
-        TASK_STACK_SIZE + ISR_DIAGNOSTICS_STACK_SIZE,
-        taskData,
-        TASK_AFTER_INTERRUPT_PRIORITY,
-        data->Stack,
-        &data->TaskBuffer);
-    if (!data->Task)
+        state->Shared.AfterInterruptStackSize + ISR_DIAGNOSTICS_STACK_SIZE,
+        state,
+        state->Shared.AfterInterruptPriority,
+        state->AfterInterruptTask->Stack,
+        &state->AfterInterruptTask->TaskBuffer);
+    if (!state->AfterInterruptTask->Task)
     {
-        ESP_LOGE(TAG, "Failed to create RTOS task");
-        return;
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
+
+    NANOCLR_NOCLEANUP();
 }
 
-void NF_RunTime_ISR_DisableRTOSTask(void *taskData)
+HRESULT NF_Runtime_ISR_DisableRTOSTask(NF_Runtime_ISR_Configuration *configuration)
 {
-    RTOSTaskData *data = (RTOSTaskData *)taskData;
-    if (data->Task)
+    NANOCLR_HEADER();
+
+    NF_Runtime_ISR_Esp32_Configuration *state = (NF_Runtime_ISR_Esp32_Configuration *)configuration;
+    if (state->AfterInterruptTask->Task)
     {
-        vTaskSuspend(data->Task);
-        vTaskDelete(data->Task);
-        data->Task = 0;
+        vTaskSuspend(state->AfterInterruptTask->Task);
+        vTaskDelete(state->AfterInterruptTask->Task);
+        state->AfterInterruptTask->Task = 0;
     }
 
-    if (data->Queue)
+    if (state->AfterInterruptTask->Queue)
     {
-        vQueueDelete(data->Queue);
-        data->Queue = 0;
+        vQueueDelete(state->AfterInterruptTask->Queue);
+        state->AfterInterruptTask->Queue = 0;
     }
+
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-void NF_RunTime_ISR_QueueRTOSTask(NF_Runtime_ISR_InterruptHandler *interruptHandler)
+void NF_Runtime_ISR_QueueRTOSTask(NF_Runtime_ISR_InterruptHandler *interruptHandler)
 {
-    RTOSTaskData *data = (RTOSTaskData *)interruptHandler->TaskMemory;
-    if (data->Queue)
+    NF_Runtime_ISR_Esp32_Configuration *state = (NF_Runtime_ISR_Esp32_Configuration *)interruptHandler->Configuration;
+    if (state->AfterInterruptTask->Queue)
     {
         BaseType_t xHigherPriorityTaskWoken;
         xHigherPriorityTaskWoken = pdFALSE;
-        xQueueSendFromISR(data->Queue, &interruptHandler, &xHigherPriorityTaskWoken);
+        xQueueSendFromISR(state->AfterInterruptTask->Queue, &interruptHandler, &xHigherPriorityTaskWoken);
         if (xHigherPriorityTaskWoken)
         {
             portYIELD_FROM_ISR();
@@ -263,74 +440,129 @@ typedef struct ManagedActivationTaskData
 {
     TaskHandle_t Task;
     StaticTask_t TaskBuffer;
-    StackType_t Stack[TASK_STACK_SIZE + ISR_DIAGNOSTICS_STACK_SIZE];
     NF_Runtime_ISR_ManagedActivation ServiceRoutine;
+    StackType_t Stack[ISR_DIAGNOSTICS_STACK_SIZE];
 } ManagedActivationTaskData;
 
 static void ManagedActivatedTask(void *arg)
 {
-    ManagedActivationTaskData *data = (ManagedActivationTaskData *)arg;
-    NF_RunTime_ISR_RunServiceRoutine(&data->ServiceRoutine);
+    NF_Runtime_ISR_Esp32_Configuration *state = (NF_Runtime_ISR_Esp32_Configuration *)arg;
+    NF_Runtime_ISR_RunServiceRoutine(&state->ManagedActivationTask->ServiceRoutine);
 
 #ifdef ENABLE_ISR_TASK_DIAGNOSTICS
-    ISR_Diagnostics_StackSize("Managed activation task", uxTaskGetStackHighWaterMark2(NULL));
+    CLR_UINT32 usedStackSize =
+        state->Shared.ManagedTaskStackSize + ISR_DIAGNOSTICS_STACK_SIZE - uxTaskGetStackHighWaterMark2(NULL);
+    ISR_Diagnostics_StackSize("Managed activation task", usedStackSize);
+    if (state->Shared.MonitorResourceUse && state->Shared.RequiredManagedTaskStackSize < usedStackSize)
+    {
+        state->Shared.RequiredManagedTaskStackSize = usedStackSize;
+    }
+#else
+    if (state->Shared.MonitorResourceUse)
+    {
+        CLR_UINT32 usedStackSize =
+            state->Shared.ManagedTaskStackSize + ISR_DIAGNOSTICS_STACK_SIZE - uxTaskGetStackHighWaterMark2(NULL);
+        if (state->Shared.RequiredManagedTaskStackSize < usedStackSize)
+        {
+            state->Shared.RequiredManagedTaskStackSize = usedStackSize;
+        }
+    }
 #endif
-    data->Task = 0;
+
+    state->ManagedActivationTask->Task = 0;
     vTaskDelete(NULL);
 }
 
-void *NF_RunTime_ISR_AllocateManagedActivationTaskData()
+HRESULT NF_Runtime_ISR_AllocateManagedActivationTaskData(NF_Runtime_ISR_Configuration *configuration)
 {
-    void *taskData = heap_caps_malloc(sizeof(ManagedActivationTaskData), MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
-    if (taskData == nullptr)
-    {
-        ESP_LOGE(TAG, "Failed to allocate managed activated task data");
-    }
+    NANOCLR_HEADER();
 
-    memset(taskData, 0, sizeof(ManagedActivationTaskData));
+    NF_Runtime_ISR_Esp32_Configuration *state = (NF_Runtime_ISR_Esp32_Configuration *)configuration;
+    if (state->ManagedActivationTask == nullptr)
+    {
+        if (configuration->ManagedTaskStackSize == 0)
+        {
+            configuration->ManagedTaskStackSize = DEFAULT_TASK_STACK_SIZE;
+        }
+
+        NF_Runtime_ISR_MemoryOffsetType size = sizeof(ManagedActivationTaskData) + configuration->ManagedTaskStackSize;
+        void *taskData = AllocateMemory(
+            InterpreterMemoryType::InterpreterMemoryType_ManagedActivation,
+            size,
+            configuration->IsISRMemorySpecial);
+        if (taskData == nullptr)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        }
+
+        state->ManagedActivationTask = (ManagedActivationTaskData *)taskData;
 #ifdef ENABLE_ISR_MEMORY_DIAGNOSTICS
-    ISR_Diagnostics_Memory("After AllocateMATaskData", InterpreterMemoryType_ISR);
+        ISR_Diagnostics_Memory("After AllocateMATaskData", InterpreterMemoryType_ISR);
 #endif
-    return taskData;
+    }
+    NANOCLR_NOCLEANUP();
 }
 
-void NF_RunTime_ISR_ReleaseManagedActivationTaskData(void *taskData)
+HRESULT NF_Runtime_ISR_ReleaseManagedActivationTaskData(NF_Runtime_ISR_Configuration *configuration)
 {
-    heap_caps_free(taskData);
+    NANOCLR_HEADER();
+
+    NF_Runtime_ISR_Esp32_Configuration *state = (NF_Runtime_ISR_Esp32_Configuration *)configuration;
+    if (state->ManagedActivationTask != nullptr)
+    {
+        heap_caps_free(state->ManagedActivationTask);
+        state->ManagedActivationTask = nullptr;
+    }
 
 #ifdef ENABLE_ISR_MEMORY_DIAGNOSTICS
     ISR_Diagnostics_Memory("After ReleaseMATaskData", InterpreterMemoryType_ISR);
 #endif
+
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-void NF_RunTime_ISR_StartManagedActivationTask(void *taskData, NF_Runtime_ISR_ManagedActivation *serviceRoutine)
+HRESULT NF_Runtime_ISR_StartManagedActivationTask(
+    NF_Runtime_ISR_Configuration *configuration,
+    NF_Runtime_ISR_ManagedActivation *serviceRoutine)
 {
-    ManagedActivationTaskData *data = (ManagedActivationTaskData *)taskData;
-    data->ServiceRoutine = *serviceRoutine;
-    data->Task = xTaskCreateStatic(
+    NANOCLR_HEADER();
+
+    NF_Runtime_ISR_Esp32_Configuration *state = (NF_Runtime_ISR_Esp32_Configuration *)configuration;
+    if (state->Shared.ManagedTaskPriority == 0)
+    {
+        state->Shared.ManagedTaskPriority = DEFAULT_TASK_MANAGED_ACTIVATION_PRIORITY;
+    }
+
+    state->ManagedActivationTask->ServiceRoutine = *serviceRoutine;
+    state->ManagedActivationTask->Task = xTaskCreateStatic(
         ManagedActivatedTask,
         "ISR-Activated-Task",
-        TASK_STACK_SIZE + ISR_DIAGNOSTICS_STACK_SIZE,
-        taskData,
-        TASK_MANAGED_ACTIVATION_PRIORITY,
-        data->Stack,
-        &data->TaskBuffer);
+        state->Shared.ManagedTaskStackSize + ISR_DIAGNOSTICS_STACK_SIZE,
+        state,
+        state->Shared.ManagedTaskPriority,
+        state->ManagedActivationTask->Stack,
+        &state->ManagedActivationTask->TaskBuffer);
 
-    if (!data->Task)
+    if (!state->ManagedActivationTask->Task)
     {
-        ESP_LOGE(TAG, "Failed to create managed activated task");
-        return;
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
+
+    NANOCLR_NOCLEANUP();
 }
 
-void NF_RunTime_ISR_StopManagedActivationTask(void *taskData)
+HRESULT NF_Runtime_ISR_StopManagedActivationTask(NF_Runtime_ISR_Configuration *configuration)
 {
-    ManagedActivationTaskData *data = (ManagedActivationTaskData *)taskData;
+    NANOCLR_HEADER();
 
-    if (!data->Task)
+    NF_Runtime_ISR_Esp32_Configuration *state = (NF_Runtime_ISR_Esp32_Configuration *)configuration;
+
+    if (state->ManagedActivationTask != nullptr && !state->ManagedActivationTask->Task)
     {
-        vTaskSuspend(data->Task);
-        vTaskDelete(data->Task);
-        data->Task = 0;
+        vTaskSuspend(state->ManagedActivationTask->Task);
+        vTaskDelete(state->ManagedActivationTask->Task);
+        state->ManagedActivationTask->Task = 0;
     }
+
+    NANOCLR_NOCLEANUP_NOLABEL();
 }

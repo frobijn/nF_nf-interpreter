@@ -54,7 +54,7 @@ static void HRtimer_callback(void *arg)
 #ifdef API_nanoFramework_Runtime_ISR_Timer
     if (hrtimers[(int)arg].InterruptHandler != nullptr)
     {
-        NF_RunTime_ISR_HandleInterrupt(hrtimers[(int)arg].InterruptHandler, 0);
+        NF_Runtime_ISR_HandleInterrupt(hrtimers[(int)arg].InterruptHandler, 0);
         return;
     }
     else if (hrtimers[(int)arg].ForISR)
@@ -68,11 +68,11 @@ static void HRtimer_callback(void *arg)
 }
 
 #ifdef API_nanoFramework_Runtime_ISR_Timer
-void NF_RunTime_ISR_InitialiseHighResTimer(
+void NF_Runtime_ISR_InitialiseHighResTimer(
     CLR_RT_HeapBlock *timer,
     NF_Runtime_ISR_InterruptHandler *interruptHandlerData)
 {
-    esp_timer_handle_t handle = NF_RunTime_ISR_GetTimerHandle(timer);
+    esp_timer_handle_t handle = NF_Runtime_ISR_GetTimerHandle(timer);
     for (int index = 0; index < MAX_HRTIMERS; index++)
     {
         if (ESP32_TIMER_HANDLE(index) == handle)
@@ -84,9 +84,9 @@ void NF_RunTime_ISR_InitialiseHighResTimer(
     }
 }
 
-void NF_RunTime_ISR_DisableHighResTimer(CLR_RT_HeapBlock *timer)
+void NF_Runtime_ISR_DisableHighResTimer(CLR_RT_HeapBlock *timer)
 {
-    esp_timer_handle_t handle = NF_RunTime_ISR_GetTimerHandle(timer);
+    esp_timer_handle_t handle = NF_Runtime_ISR_GetTimerHandle(timer);
     for (int index = 0; index < MAX_HRTIMERS; index++)
     {
         if (ESP32_TIMER_HANDLE(index) == handle)
@@ -97,7 +97,7 @@ void NF_RunTime_ISR_DisableHighResTimer(CLR_RT_HeapBlock *timer)
     }
 }
 
-esp_timer_handle_t NF_RunTime_ISR_GetTimerHandle(CLR_RT_HeapBlock *timer)
+esp_timer_handle_t NF_Runtime_ISR_GetTimerHandle(CLR_RT_HeapBlock *timer)
 {
     if (timer == nullptr)
     {
